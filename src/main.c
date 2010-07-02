@@ -10,7 +10,7 @@
 #include <glib.h>
 #include <gio/gio.h>
 
-#define GUI_FILE "hangtux.glade"
+#define GUI_FILE "ghangtux.glade"
 #define UI_FILE "menu.ui"
 #define ACTION_GROUP "MainActionGroup"
 #define WIN "main_win"
