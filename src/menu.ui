@@ -1,0 +1,16 @@
+<ui>
+   <menubar name="MainMenu">
+     <menu name="GameMenu" action="GameMenuAction">
+       <menu name="ThemesMenu" action="ThemesMenuAction">
+          <menuitem name="FilmsThemesMenu" action="FilmsThemesMenuAction"/>
+          <menuitem name="ObjectsThemesMenu" action="ObjectsThemesMenuAction"/>
+          <menuitem name="PersonsThemesMenu" action="PersonsThemesMenuAction"/>
+       </menu>
+       <separator/>
+       <menuitem name="QuitMenu" action="QuitMenuAction"/>
+     </menu>
+     <menu name="HelpMenu" action="HelpMenuAction">
+        <menuitem name="AboutHelpMenu" action="AboutHelpMenuAction"/>
+     </menu>
+   </menubar>
+</ui>
