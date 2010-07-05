@@ -1,22 +1,22 @@
-computer
-picture
-chair
-triangle
-table
-pencil
-flower
-book
-wall
-wheel
-blackboard
-jeans
-skirt
-dog
-cat
-lamp
-radiator
-sky
-star
-moon
-sun
-rainbow
+C O M P U T E R
+P I C T U R E
+C H A I R
+T R I A N G L E
+T A B L E
+P E N C I L
+F L O W E R
+B O O K 
+W A L L
+W H E E L
+B L A C K B O A R D
+J E A N S
+S K I R T
+D O G
+C A T
+L A M P
+R A D I A T O R
+S K Y
+S T A R
+M O O N
+S U N
+R A I N B O W

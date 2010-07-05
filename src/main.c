@@ -9,6 +9,7 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <gio/gio.h>
+#include <string.h>
 
 #define GUI_FILE "ghangtux.glade"
 #define UI_FILE "menu.ui"
@@ -20,14 +21,14 @@
 #define OBJECTS_FILE "../objects.txt"
 #define PERSONS_FILE "../persons.txt"
 #define MIN_RANDOM 1
-#define MAX_RANDOM 40
+#define MAX_RANDOM 3
 
 void main_win_destroy (GtkObject *window, gpointer data);
 static void get_sentence_action (GtkRadioAction *raction,
                                  GtkRadioAction *curr_raction, gpointer data);
 static void quit_action (GtkAction *action, gpointer data);
 static void about_action (GtkAction *action, gpointer data);
-static void format_sentence (gchar *sentence, gchar *letter);
+void format_sentence_with_letter (GtkButton *button, gpointer data);
 
 /* --------------------------------------------------------*/
 /* --------------  START: list of actions  ----------------*/
@@ -107,8 +108,16 @@ static const guint NUM_ACTIONS = G_N_ELEMENTS (actions);
 /* --------------  END: list of actions  ----------------*/
 /* --------------------------------------------------------*/
 
+/* Actual display sentence management. */
+struct SentenceWidget
+{
+   gchar *sentence;
+   gchar *display_sentence;
+   const gchar *valid_chars;
+} sentencew;
+
 int
-main(int argc,
+main (int argc,
      char **argv)
 {
    GtkBuilder *builder = NULL;
@@ -170,6 +179,9 @@ void
 main_win_destroy (GtkObject *window, 
                   gpointer data)
 {
+   g_print ("\n--------------------------------------------------------------------\n\n");
+   g_print ("\n- Leaving the application. Thank you for playing with GHangTux. -\n\n");
+   g_print ("\n--------------------------------------------------------------------\n\n");
    gtk_main_quit();
 }
 
@@ -184,10 +196,13 @@ get_sentence_action (GtkRadioAction *raction,
    GError *error = NULL;
    GFileInputStream *fstream = NULL; 
    GDataInputStream *stream = NULL;
-   gchar *sentence = NULL;
+   sentencew.sentence = NULL;
+   sentencew.display_sentence = NULL;
+   sentencew.valid_chars = NULL;
    gsize length = 0;
    gint random = 0;
 
+   /* Select the file */
    switch (gtk_radio_action_get_current_value (curr_raction))
    {
       case 0:
@@ -216,22 +231,55 @@ get_sentence_action (GtkRadioAction *raction,
 
    /* Select a random film from the file. */
    random = g_random_int_range (MIN_RANDOM, MAX_RANDOM);
-   g_print ("random value = %i\n", random);
 
-   while (((sentence = g_data_input_stream_read_line (stream, &length, NULL, 
+   while (((sentencew.sentence = g_data_input_stream_read_line (stream, &length, NULL, 
             &error)) != NULL) && (random != 0))
    {
       random--;
    }
    
-   format_sentence (sentence, " ");
+   /* Format the sentence for displaying the first time. */
+   sentencew.display_sentence = g_strdup (sentencew.sentence);
+   sentencew.valid_chars = " ";
+   g_strcanon ( sentencew.display_sentence, sentencew.valid_chars, '_');
 }
 
-/* Formats the sentence or word for display. */
-static void
-format_sentence (gchar *sentence, gchar *letter)
+/* Formats the sentence with a new letter for displaying. */
+void
+format_sentence_with_letter (GtkButton *button, gpointer data)
 {
-   g_print ("%s\n", sentence);   
+   const gchar *label = NULL;
+   gint i = 0;
+   gint valid_letter = 0;
+   gchar *letter = NULL;
+
+   label = gtk_button_get_label (GTK_BUTTON (button)); 
+   letter = g_strdup (label);
+
+   /* Looks for the letter of the label in the sentence. */
+   for (i=0; i!=strlen(sentencew.sentence); i++)
+   { 
+      if (sentencew.sentence[i] == letter[1])
+      {
+          valid_letter = 1;
+      }
+   }
+
+   /* Add the letter as a valid character and displays it. */
+   if (valid_letter == 1)
+   {
+      sentencew.valid_chars = g_strconcat (sentencew.valid_chars, letter, NULL);
+      sentencew.display_sentence = g_strdup (sentencew.sentence);
+      g_strcanon ( sentencew.display_sentence, sentencew.valid_chars, '_');
+      g_print ("VALID_CHARS = %s\n", sentencew.valid_chars);   
+   }
+   /* Loads a new image of the Hangtux */
+   else
+   {
+      g_print ("\n Oh Oh...!! Loading the Hangtux image...\n");
+   }
+   g_print ("DISPLAY SENTENCE = %s\n", sentencew.display_sentence);   
+   g_print ("SENTENCE         = %s\n", sentencew.sentence);   
 }
 
 /* Quits the application from the menu. */
@@ -239,9 +287,6 @@ static void
 quit_action (GtkAction *action,
              gpointer data)
 {
-   g_print ("\n--------------------------------------------------------------------\n\n");
-   g_print ("\n- Leaving the application. Thank you for playing with GHangTux 0.1 -\n\n");
-   g_print ("\n--------------------------------------------------------------------\n\n");
    main_win_destroy (NULL,NULL);
 }
 
