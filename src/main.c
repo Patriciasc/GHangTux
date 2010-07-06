@@ -11,12 +11,14 @@
 #include <gio/gio.h>
 #include <string.h>
 
+#define TRANSLATOR "Patricia Santana Cruz"
 #define GUI_FILE "ghangtux.glade"
 #define UI_FILE "menu.ui"
 #define ACTION_GROUP "MainActionGroup"
 #define WIN "main_win"
 #define VBOX "vbox"
 #define MENU "/MainMenu"
+#define SENTENCE_LABEL "for_sentence_label"
 #define FILMS_FILE "../films.txt"
 #define OBJECTS_FILE "../objects.txt"
 #define PERSONS_FILE "../persons.txt"
@@ -114,6 +116,7 @@ struct SentenceWidget
    gchar *sentence;
    gchar *display_sentence;
    const gchar *valid_chars;
+   GtkLabel *display_label;
 } sentencew;
 
 int
@@ -141,6 +144,7 @@ main (int argc,
 
    window = GTK_WIDGET (gtk_builder_get_object (builder,WIN));
    vbox = GTK_WIDGET (gtk_builder_get_object (builder, VBOX));
+   sentencew.display_label = GTK_LABEL (gtk_builder_get_object (builder, SENTENCE_LABEL));
 
    gtk_builder_connect_signals (builder,NULL);
    g_object_unref (G_OBJECT(builder));
@@ -196,11 +200,12 @@ get_sentence_action (GtkRadioAction *raction,
    GError *error = NULL;
    GFileInputStream *fstream = NULL; 
    GDataInputStream *stream = NULL;
+   gsize length = 0;
+   gint random = 0;
+
    sentencew.sentence = NULL;
    sentencew.display_sentence = NULL;
    sentencew.valid_chars = NULL;
-   gsize length = 0;
-   gint random = 0;
 
    /* Select the file */
    switch (gtk_radio_action_get_current_value (curr_raction))
@@ -271,7 +276,7 @@ format_sentence_with_letter (GtkButton *button, gpointer data)
       sentencew.valid_chars = g_strconcat (sentencew.valid_chars, letter, NULL);
       sentencew.display_sentence = g_strdup (sentencew.sentence);
       g_strcanon ( sentencew.display_sentence, sentencew.valid_chars, '_');
-      g_print ("VALID_CHARS = %s\n", sentencew.valid_chars);   
+      gtk_label_set_text (sentencew.display_label, sentencew.display_sentence);
    }
    /* Loads a new image of the Hangtux */
    else
@@ -294,5 +299,62 @@ quit_action (GtkAction *action,
 static void
 about_action (GtkAction *action,
               gpointer data){
-   g_print ("about\n");
+
+  GtkWidget *dialog;
+  GdkPixbuf *logo;
+  GError *error = NULL;
+
+  const gchar *authors[] = {
+    "Patricia Santana Cruz", 
+    NULL
+  };
+
+  const gchar *documenters[] = {
+    "Patricia Santana Cruz",
+    NULL
+  };
+  
+  dialog = gtk_about_dialog_new ();
+  
+  //XXX this is not the definitive image
+  logo = gdk_pixbuf_new_from_file ("../Tux.png", &error);
+
+  /* Set the application logo or handle the error. */
+  if (error == NULL)
+    gtk_about_dialog_set_logo (GTK_ABOUT_DIALOG (dialog), logo);
+  else
+  {
+    if (error->domain == GDK_PIXBUF_ERROR)
+      g_print ("GdkPixbufError: %s\n", error->message);
+    else if (error->domain == G_FILE_ERROR)
+      g_print ("GFileError: %s\n", error->message);
+    else
+      g_print ("An error in the unexpected domain:%d has occurred!\n", error->domain);
+
+    g_error_free (error);
+  }
+
+  /* Set application data that will be displayed in the main dialog. */
+  gtk_about_dialog_set_program_name (GTK_ABOUT_DIALOG (dialog), "GHangTux");
+  gtk_about_dialog_set_version (GTK_ABOUT_DIALOG (dialog), "0.1");
+  gtk_about_dialog_set_copyright (GTK_ABOUT_DIALOG (dialog), 
+                                  "(C) 2010 Patricia Santana Cruz");
+  gtk_about_dialog_set_comments (GTK_ABOUT_DIALOG (dialog), 
+                                 "GHangTux is a variation of the popular Hangman game.");
+
+  //XXX Need to load the file with the text here
+  gtk_about_dialog_set_license (GTK_ABOUT_DIALOG (dialog), 
+                                "Free: (TODO: look for the right text).");
+  gtk_about_dialog_set_website (GTK_ABOUT_DIALOG (dialog), 
+                                "http://github.com/Patriciasc/GHangTux");
+  gtk_about_dialog_set_website_label (GTK_ABOUT_DIALOG (dialog), 
+                                      "http://github.com/Patriciasc/GHangTux");
+
+  gtk_about_dialog_set_authors (GTK_ABOUT_DIALOG (dialog), authors);
+  gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG (dialog), documenters);
+  gtk_about_dialog_set_translator_credits (GTK_ABOUT_DIALOG (dialog), 
+                                           TRANSLATOR);
+
+  gtk_dialog_run (GTK_DIALOG (dialog));
+  gtk_widget_destroy (dialog);
 }
