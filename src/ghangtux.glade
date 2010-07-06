@@ -28,9 +28,9 @@
               </packing>
             </child>
             <child>
-              <object class="GtkImage" id="hangtux_image">
+              <object class="GtkImage" id="hangtux_area">
                 <property name="visible">True</property>
-                <property name="stock">gtk-missing-image</property>
+                <property name="stock">gtk-dialog-warning</property>
               </object>
               <packing>
                 <property name="position">1</property>

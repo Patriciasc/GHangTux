@@ -9,8 +9,10 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <gio/gio.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
 #include <string.h>
 
+#define TUX_IMG_0 "../Tux.png"
 #define TRANSLATOR "Patricia Santana Cruz"
 #define GUI_FILE "ghangtux.glade"
 #define UI_FILE "menu.ui"
@@ -18,12 +20,13 @@
 #define WIN "main_win"
 #define VBOX "vbox"
 #define MENU "/MainMenu"
+#define IMAGE "hangtux_area"
 #define SENTENCE_LABEL "for_sentence_label"
 #define FILMS_FILE "../films.txt"
 #define OBJECTS_FILE "../objects.txt"
 #define PERSONS_FILE "../persons.txt"
 #define MIN_RANDOM 1
-#define MAX_RANDOM 3
+#define MAX_RANDOM 2
 
 void main_win_destroy (GtkObject *window, gpointer data);
 static void get_sentence_action (GtkRadioAction *raction,
@@ -31,6 +34,7 @@ static void get_sentence_action (GtkRadioAction *raction,
 static void quit_action (GtkAction *action, gpointer data);
 static void about_action (GtkAction *action, gpointer data);
 void format_sentence_with_letter (GtkButton *button, gpointer data);
+static void load_image (const char *file_image);
 
 /* --------------------------------------------------------*/
 /* --------------  START: list of actions  ----------------*/
@@ -117,6 +121,8 @@ struct SentenceWidget
    gchar *display_sentence;
    const gchar *valid_chars;
    GtkLabel *display_label;
+   GtkImage *image;
+   gint n_img;
 } sentencew;
 
 int
@@ -131,8 +137,13 @@ main (int argc,
    GtkUIManager *uimanager = NULL;
    GError *error = NULL;
 
-   gtk_init (&argc, &argv);
+   sentencew.sentence = NULL;
+   sentencew.display_sentence = NULL;
+   sentencew.valid_chars = NULL;
+   sentencew.n_img = 0;
 
+   gtk_init (&argc, &argv);
+   
    builder = gtk_builder_new();
 
    if (!gtk_builder_add_from_file (builder, GUI_FILE, &error))
@@ -145,6 +156,7 @@ main (int argc,
    window = GTK_WIDGET (gtk_builder_get_object (builder,WIN));
    vbox = GTK_WIDGET (gtk_builder_get_object (builder, VBOX));
    sentencew.display_label = GTK_LABEL (gtk_builder_get_object (builder, SENTENCE_LABEL));
+   sentencew.image = GTK_IMAGE (gtk_builder_get_object (builder, IMAGE));
 
    gtk_builder_connect_signals (builder,NULL);
    g_object_unref (G_OBJECT(builder));
@@ -153,7 +165,7 @@ main (int argc,
    def_group = gtk_action_group_new (ACTION_GROUP);
    gtk_action_group_add_actions (def_group, actions, NUM_ACTIONS, NULL);
    gtk_action_group_add_radio_actions (def_group, radio_actions, NUM_RACTIONS,
-                                       -1, G_CALLBACK (get_sentence_action),  NULL);
+                                       0, G_CALLBACK (get_sentence_action),  NULL);
  
    uimanager = gtk_ui_manager_new ();
    gtk_ui_manager_insert_action_group (uimanager, def_group, 0);
@@ -172,7 +184,9 @@ main (int argc,
    gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, FALSE, 1);
    gtk_box_reorder_child (GTK_BOX (vbox), menubar, 0);
 
+   get_sentence_action(NULL,0,NULL);
     
+   load_image(TUX_IMG_0);
    gtk_widget_show_all (window);
    gtk_main();
    return 0;
@@ -189,7 +203,6 @@ main_win_destroy (GtkObject *window,
    gtk_main_quit();
 }
 
-//XXX REMEBER TO FREE MEMORY or CLOSE FILES, ETC
 /* Selects a random sentence or word from the game files. */
 static void
 get_sentence_action (GtkRadioAction *raction,
@@ -202,10 +215,6 @@ get_sentence_action (GtkRadioAction *raction,
    GDataInputStream *stream = NULL;
    gsize length = 0;
    gint random = 0;
-
-   sentencew.sentence = NULL;
-   sentencew.display_sentence = NULL;
-   sentencew.valid_chars = NULL;
 
    /* Select the file */
    switch (gtk_radio_action_get_current_value (curr_raction))
@@ -247,6 +256,7 @@ get_sentence_action (GtkRadioAction *raction,
    sentencew.display_sentence = g_strdup (sentencew.sentence);
    sentencew.valid_chars = " ";
    g_strcanon ( sentencew.display_sentence, sentencew.valid_chars, '_');
+   gtk_label_set_text (sentencew.display_label, sentencew.display_sentence);
 }
 
 /* Formats the sentence with a new letter for displaying. */
@@ -280,11 +290,36 @@ format_sentence_with_letter (GtkButton *button, gpointer data)
    }
    /* Loads a new image of the Hangtux */
    else
-   {
+   { 
+      load_image(TUX_IMG_0);
       g_print ("\n Oh Oh...!! Loading the Hangtux image...\n");
    }
-   g_print ("DISPLAY SENTENCE = %s\n", sentencew.display_sentence);   
-   g_print ("SENTENCE         = %s\n", sentencew.sentence);   
+}
+
+/* Loads an image for the GtkImage central area. */
+static void
+load_image (const char *file_image)
+{
+   GdkPixbuf *tux_image = NULL;
+   GError *error = NULL;
+   
+   tux_image = gdk_pixbuf_new_from_file (file_image, &error);
+
+   if (error != NULL)
+   {
+      if (error->domain == GDK_PIXBUF_ERROR)
+         g_print ("GdkPixbufError: %s\n", error->message);
+      else if (error->domain == G_FILE_ERROR)
+         g_print ("GFileError: %s\n", error->message);
+      else
+         g_print ("An error in the unexpected domain:%d has occurred!\n", error->domain);
+ 
+      g_error_free (error);
+   }
+
+   gtk_image_set_from_pixbuf (sentencew.image, tux_image); 
+   //g_object_unref (sentencew.image);
+   sentencew.n_img ++;
 }
 
 /* Quits the application from the menu. */
@@ -317,7 +352,7 @@ about_action (GtkAction *action,
   dialog = gtk_about_dialog_new ();
   
   //XXX this is not the definitive image
-  logo = gdk_pixbuf_new_from_file ("../Tux.png", &error);
+  logo = gdk_pixbuf_new_from_file (TUX_IMG_0, &error);
 
   /* Set the application logo or handle the error. */
   if (error == NULL)
