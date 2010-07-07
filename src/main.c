@@ -12,7 +12,7 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <string.h>
 
-#define TUX_IMG_0 "../Tux.png"
+#define TUX_IMG_0 "../Tux0.png"
 #define TRANSLATOR "Patricia Santana Cruz"
 #define GUI_FILE "ghangtux.glade"
 #define UI_FILE "menu.ui"
@@ -27,13 +27,14 @@
 #define PERSONS_FILE "../persons.txt"
 #define MIN_RANDOM 1
 #define MAX_RANDOM 2
+#define NUM_IMAGES 5
 
 void main_win_destroy (GtkObject *window, gpointer data);
 static void get_sentence_action (GtkRadioAction *raction,
                                  GtkRadioAction *curr_raction, gpointer data);
 static void quit_action (GtkAction *action, gpointer data);
 static void about_action (GtkAction *action, gpointer data);
-void format_sentence_with_letter (GtkButton *button, gpointer data);
+void format_sentence_with_letter (GtkToggleButton *button, gpointer data);
 static void load_image (const char *file_image);
 
 /* --------------------------------------------------------*/
@@ -144,6 +145,7 @@ main (int argc,
 
    gtk_init (&argc, &argv);
    
+   /* Setting up the builder. */
    builder = gtk_builder_new();
 
    if (!gtk_builder_add_from_file (builder, GUI_FILE, &error))
@@ -186,8 +188,12 @@ main (int argc,
 
    get_sentence_action(NULL,0,NULL);
     
-   load_image(TUX_IMG_0);
    gtk_widget_show_all (window);
+   
+   /* Load intro image for the game. */
+   load_image(TUX_IMG_0);
+   sentencew.n_img ++;
+
    gtk_main();
    return 0;
 } 
@@ -216,7 +222,9 @@ get_sentence_action (GtkRadioAction *raction,
    gsize length = 0;
    gint random = 0;
 
-   /* Select the file */
+   // XXX Call FUNCTION to enable ALL buttons
+
+   /* Select the file. */
    switch (gtk_radio_action_get_current_value (curr_raction))
    {
       case 0:
@@ -243,7 +251,7 @@ get_sentence_action (GtkRadioAction *raction,
 
    stream = g_data_input_stream_new (G_INPUT_STREAM(fstream));
 
-   /* Select a random film from the file. */
+   /* Select a random sentence from the file. */
    random = g_random_int_range (MIN_RANDOM, MAX_RANDOM);
 
    while (((sentencew.sentence = g_data_input_stream_read_line (stream, &length, NULL, 
@@ -261,17 +269,20 @@ get_sentence_action (GtkRadioAction *raction,
 
 /* Formats the sentence with a new letter for displaying. */
 void
-format_sentence_with_letter (GtkButton *button, gpointer data)
+format_sentence_with_letter (GtkToggleButton *button, gpointer data)
 {
    const gchar *label = NULL;
    gint i = 0;
    gint valid_letter = 0;
    gchar *letter = NULL;
+	
+   /* Leaves the button pressed (activated). */
+   gtk_toggle_button_set_active (button, TRUE);
 
    label = gtk_button_get_label (GTK_BUTTON (button)); 
    letter = g_strdup (label);
 
-   /* Looks for the letter of the label in the sentence. */
+   /* Looks for the label's letter in the sentence. */
    for (i=0; i!=strlen(sentencew.sentence); i++)
    { 
       if (sentencew.sentence[i] == letter[1])
@@ -288,12 +299,17 @@ format_sentence_with_letter (GtkButton *button, gpointer data)
       g_strcanon ( sentencew.display_sentence, sentencew.valid_chars, '_');
       gtk_label_set_text (sentencew.display_label, sentencew.display_sentence);
    }
-   /* Loads a new image of the Hangtux */
+   /* Loads a new image of the Hangtux. */
    else
    { 
-      load_image(TUX_IMG_0);
-      g_print ("\n Oh Oh...!! Loading the Hangtux image...\n");
+      load_image (g_strdup_printf("../img%i.png",sentencew.n_img));
+      sentencew.n_img ++;
+      /* Deactivation of all buttons. */
+      if (sentencew.n_img == NUM_IMAGES)
+         gtk_label_set_text (sentencew.display_label, "\nOhhh, that was close, try again!"); 
+         //XXX Call Function for desable ALL buttons
    }
+
 }
 
 /* Loads an image for the GtkImage central area. */
@@ -316,10 +332,8 @@ load_image (const char *file_image)
  
       g_error_free (error);
    }
-
+   
    gtk_image_set_from_pixbuf (sentencew.image, tux_image); 
-   //g_object_unref (sentencew.image);
-   sentencew.n_img ++;
 }
 
 /* Quits the application from the menu. */
@@ -378,6 +392,7 @@ about_action (GtkAction *action,
                                  "GHangTux is a variation of the popular Hangman game.");
 
   //XXX Need to load the file with the text here
+  //XXX Use #define for texts!!
   gtk_about_dialog_set_license (GTK_ABOUT_DIALOG (dialog), 
                                 "Free: (TODO: look for the right text).");
   gtk_about_dialog_set_website (GTK_ABOUT_DIALOG (dialog), 
