@@ -126,15 +126,15 @@ static const guint NUM_ACTIONS = G_N_ELEMENTS (actions);
 /* Actual display sentence management. */
 struct GameWidget
 {
-   gchar *sentence;
-   gchar *display_sentence;
-   const gchar *valid_chars;
-   GtkLabel *display_label;
-   GtkImage *image;
-   gint n_img;
-   gboolean first_game;
-   GtkWidget *statusbar;
-   gint context;
+   gchar *sentence;           /* games's sentence */
+   gchar *display_sentence;   /* displayed sentence */
+   const gchar *valid_chars;  /* user asserted characters */
+   GtkLabel *display_label;   /* label for display_sentence */
+   GtkImage *image;           /* displayed image */
+   gint n_img;                /* current image number */
+   gboolean first_game;       /* indicates if the current game is the first */
+   GtkWidget *statusbar;      /* game status bar */
+   gint scontext;             /* game status bar's context */
 } gamew;
 
 /* Keyboard management */
@@ -160,8 +160,13 @@ main (int argc,
    gamew.sentence = NULL;
    gamew.display_sentence = NULL;
    gamew.valid_chars = NULL;
+   gamew.display_label = NULL;
+   gamew.image = NULL;
    gamew.n_img = 0;
    gamew.first_game = 1;
+   gamew.statusbar = NULL;
+   gamew.scontext = 0;
+
    keyboard.table = NULL;
    keyboard.keys = NULL;
    keyboard.index = NULL;
@@ -258,8 +263,8 @@ get_sentence_action (GtkRadioAction *raction,
    }
 
    /* Status bar context. */
-   gamew.context = gtk_statusbar_get_context_id (GTK_STATUSBAR (gamew.statusbar),
-                                                 "Statusbar");
+   gamew.scontext = gtk_statusbar_get_context_id (
+                    GTK_STATUSBAR (gamew.statusbar),"Statusbar");
    /* Select the file. */
    switch (gtk_radio_action_get_current_value (curr_raction))
    {
@@ -349,7 +354,7 @@ format_sentence_with_letter (GtkToggleButton *button, gpointer data)
          gtk_label_set_text (gamew.display_label, "Ohhh, that was close. Try again!.\n Select a theme from the menu."); 
          
          /* Change status bar state. */
-         gamew.context = gtk_statusbar_get_context_id (GTK_STATUSBAR (gamew.statusbar),
+         gamew.scontext = gtk_statusbar_get_context_id (GTK_STATUSBAR (gamew.statusbar),
                                                  "Statusbar");
          gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "End of game. Try again!");
 
