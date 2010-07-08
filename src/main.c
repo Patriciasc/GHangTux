@@ -16,7 +16,11 @@
 #include <stdlib.h>
 
 #define TUX_IMG_0 "../Tux0.png"
+#define FILMS_FILE "../films.txt"
+#define OBJECTS_FILE "../objects.txt"
+#define PERSONS_FILE "../persons.txt"
 #define TRANSLATOR "Patricia Santana Cruz"
+
 #define GUI_FILE "ghangtux.glade"
 #define UI_FILE "menu.ui"
 #define ACTION_GROUP "MainActionGroup"
@@ -27,9 +31,7 @@
 #define STATUSBAR "statusbar"
 #define KEYBOARD "keyboard_EN"
 #define SENTENCE_LABEL "for_sentence_label"
-#define FILMS_FILE "../films.txt"
-#define OBJECTS_FILE "../objects.txt"
-#define PERSONS_FILE "../persons.txt"
+
 #define MIN_RANDOM 1
 #define MAX_RANDOM 2
 #define NUM_IMAGES 5
@@ -122,17 +124,18 @@ static const guint NUM_ACTIONS = G_N_ELEMENTS (actions);
 /* --------------------------------------------------------*/
 
 /* Actual display sentence management. */
-struct SentenceWidget
+struct GameWidget
 {
    gchar *sentence;
    gchar *display_sentence;
    const gchar *valid_chars;
    GtkLabel *display_label;
-   GtkWidget *statusbar;
    GtkImage *image;
    gint n_img;
    gboolean first_game;
-} sentencew;
+   GtkWidget *statusbar;
+   gint context;
+} gamew;
 
 /* Keyboard management */
 struct _Keyboard
@@ -154,11 +157,11 @@ main (int argc,
    GtkUIManager *uimanager = NULL;
    GError *error = NULL;
 
-   sentencew.sentence = NULL;
-   sentencew.display_sentence = NULL;
-   sentencew.valid_chars = NULL;
-   sentencew.n_img = 0;
-   sentencew.first_game = 1;
+   gamew.sentence = NULL;
+   gamew.display_sentence = NULL;
+   gamew.valid_chars = NULL;
+   gamew.n_img = 0;
+   gamew.first_game = 1;
    keyboard.table = NULL;
    keyboard.keys = NULL;
    keyboard.index = NULL;
@@ -177,9 +180,9 @@ main (int argc,
 
    window = GTK_WIDGET (gtk_builder_get_object (builder,WIN));
    vbox = GTK_WIDGET (gtk_builder_get_object (builder, VBOX));
-   sentencew.display_label = GTK_LABEL (gtk_builder_get_object (builder, SENTENCE_LABEL));
-   sentencew.image = GTK_IMAGE (gtk_builder_get_object (builder, IMAGE));
-   sentencew.statusbar = GTK_WIDGET (gtk_builder_get_object (builder, STATUSBAR));
+   gamew.display_label = GTK_LABEL (gtk_builder_get_object (builder, SENTENCE_LABEL));
+   gamew.image = GTK_IMAGE (gtk_builder_get_object (builder, IMAGE));
+   gamew.statusbar = GTK_WIDGET (gtk_builder_get_object (builder, STATUSBAR));
    keyboard.table = GTK_CONTAINER (gtk_builder_get_object (builder, KEYBOARD));
    keyboard.keys = gtk_container_get_children (keyboard.table);
    keyboard.index = keyboard.keys;
@@ -215,7 +218,7 @@ main (int argc,
    /* Prepares game. */
    get_sentence_action(NULL,0,NULL);
    load_image(TUX_IMG_0);
-   sentencew.n_img ++;
+   gamew.n_img ++;
 
    gtk_main();
    return 0;
@@ -246,28 +249,33 @@ get_sentence_action (GtkRadioAction *raction,
    gint random = 0;
 
    /* Not first game => Reset values and prepares new game. */
-   if (!sentencew.first_game)
+   if (!gamew.first_game)
    {
-      sentencew.valid_chars = NULL;
-      sentencew.n_img = 0;
+      gamew.valid_chars = NULL;
+      gamew.n_img = 0;
       load_image(TUX_IMG_0);
       set_keyboard_active (TRUE);
    }
 
+   /* Status bar context. */
+   gamew.context = gtk_statusbar_get_context_id (GTK_STATUSBAR (gamew.statusbar),
+                                                 "Statusbar example");
    /* Select the file. */
    switch (gtk_radio_action_get_current_value (curr_raction))
    {
       case 0:
          file = g_file_new_for_path (FILMS_FILE);
-         /* XXX Status Bar */
+         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Films");
          break;
 
       case 1:
          file = g_file_new_for_path (OBJECTS_FILE);
+         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Objects");
          break;
 
       case 2:
          file = g_file_new_for_path (PERSONS_FILE);
+         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Persons");
          break;
 
       default:
@@ -285,17 +293,17 @@ get_sentence_action (GtkRadioAction *raction,
    /* Select a random sentence from the file. */
    random = g_random_int_range (MIN_RANDOM, MAX_RANDOM);
 
-   while (((sentencew.sentence = g_data_input_stream_read_line (stream, &length, NULL, 
+   while (((gamew.sentence = g_data_input_stream_read_line (stream, &length, NULL, 
             &error)) != NULL) && (random != 0))
    {
       random--;
    }
    
    /* Format the sentence for displaying the first time. */
-   sentencew.display_sentence = g_strdup (sentencew.sentence);
-   sentencew.valid_chars = " ";
-   g_strcanon ( sentencew.display_sentence, sentencew.valid_chars, '_');
-   gtk_label_set_text (sentencew.display_label, sentencew.display_sentence);
+   gamew.display_sentence = g_strdup (gamew.sentence);
+   gamew.valid_chars = " ";
+   g_strcanon ( gamew.display_sentence, gamew.valid_chars, '_');
+   gtk_label_set_text (gamew.display_label, gamew.display_sentence);
 }
 
 /* Formats the sentence with a new letter for displaying. */
@@ -314,9 +322,9 @@ format_sentence_with_letter (GtkToggleButton *button, gpointer data)
    letter = g_strdup (label);
 
    /* Looks for the label's letter in the sentence. */
-   for (i=0; i!=strlen(sentencew.sentence); i++)
+   for (i=0; i!=strlen(gamew.sentence); i++)
    { 
-      if (sentencew.sentence[i] == letter[1])
+      if (gamew.sentence[i] == letter[1])
       {
           valid_letter = 1;
       }
@@ -325,22 +333,22 @@ format_sentence_with_letter (GtkToggleButton *button, gpointer data)
    /* Add the letter as a valid character and displays it. */
    if (valid_letter == 1)
    {
-      sentencew.valid_chars = g_strconcat (sentencew.valid_chars, letter, NULL);
-      sentencew.display_sentence = g_strdup (sentencew.sentence);
-      g_strcanon ( sentencew.display_sentence, sentencew.valid_chars, '_');
-      gtk_label_set_text (sentencew.display_label, sentencew.display_sentence);
+      gamew.valid_chars = g_strconcat (gamew.valid_chars, letter, NULL);
+      gamew.display_sentence = g_strdup (gamew.sentence);
+      g_strcanon ( gamew.display_sentence, gamew.valid_chars, '_');
+      gtk_label_set_text (gamew.display_label, gamew.display_sentence);
    }
    /* Loads a new image of the Hangtux. */
    else
    { 
-      load_image (g_strdup_printf("../img%i.png",sentencew.n_img));
-      sentencew.n_img ++;
+      load_image (g_strdup_printf("../img%i.png",gamew.n_img));
+      gamew.n_img ++;
       /* Desable the use of the keys */
-      if (sentencew.n_img == NUM_IMAGES)
+      if (gamew.n_img == NUM_IMAGES)
       {
-         gtk_label_set_text (sentencew.display_label, "Ohhh, that was close. Try again!.\n Select a theme from the menu."); 
+         gtk_label_set_text (gamew.display_label, "Ohhh, that was close. Try again!.\n Select a theme from the menu."); 
          set_keyboard_active (FALSE);
-         sentencew.first_game = 0;
+         gamew.first_game = 0;
       }
    }
 
@@ -379,7 +387,7 @@ load_image (const char *file_image)
       g_error_free (error);
    }
    
-   gtk_image_set_from_pixbuf (sentencew.image, tux_image); 
+   gtk_image_set_from_pixbuf (gamew.image, tux_image); 
 }
 
 /* Quits the application from the menu. */
