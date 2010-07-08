@@ -1,16 +1,19 @@
-// ############################################################################
-// Author: Patricia Santana Cruz                                              #
-// Version: 0.1                                                               #  
-// Description: Game variation of Hangman                                     #
-// Compile me with:                                                           #
-// gcc -g main.c -o hangtux `pkg-config --cflags --libs gtk+-2.0 gmodule-2.0` #
-// ############################################################################
+/**
+* ##############################################################################
+* # Author: Patricia Santana Cruz                                              #
+* # Version: 0.1                                                               #  
+* # Description: Game variation of Hangman                                     #
+* # Compile me with:                                                           #
+* # gcc -g main.c -o ghangtux `pkg-config --cflags --libs gtk+-2.0 gmodule-2.0`#
+* ##############################################################################
+**/
 
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <gio/gio.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define TUX_IMG_0 "../Tux0.png"
 #define TRANSLATOR "Patricia Santana Cruz"
@@ -21,6 +24,8 @@
 #define VBOX "vbox"
 #define MENU "/MainMenu"
 #define IMAGE "hangtux_area"
+#define STATUSBAR "statusbar"
+#define KEYBOARD "keyboard_EN"
 #define SENTENCE_LABEL "for_sentence_label"
 #define FILMS_FILE "../films.txt"
 #define OBJECTS_FILE "../objects.txt"
@@ -36,6 +41,7 @@ static void quit_action (GtkAction *action, gpointer data);
 static void about_action (GtkAction *action, gpointer data);
 void format_sentence_with_letter (GtkToggleButton *button, gpointer data);
 static void load_image (const char *file_image);
+static void set_keyboard_active (gboolean active);
 
 /* --------------------------------------------------------*/
 /* --------------  START: list of actions  ----------------*/
@@ -122,9 +128,19 @@ struct SentenceWidget
    gchar *display_sentence;
    const gchar *valid_chars;
    GtkLabel *display_label;
+   GtkWidget *statusbar;
    GtkImage *image;
    gint n_img;
+   gboolean first_game;
 } sentencew;
+
+/* Keyboard management */
+struct _Keyboard
+{
+   GtkContainer *table;
+   GList *keys;
+   GList *index;
+} keyboard;
 
 int
 main (int argc,
@@ -142,6 +158,10 @@ main (int argc,
    sentencew.display_sentence = NULL;
    sentencew.valid_chars = NULL;
    sentencew.n_img = 0;
+   sentencew.first_game = 1;
+   keyboard.table = NULL;
+   keyboard.keys = NULL;
+   keyboard.index = NULL;
 
    gtk_init (&argc, &argv);
    
@@ -159,6 +179,10 @@ main (int argc,
    vbox = GTK_WIDGET (gtk_builder_get_object (builder, VBOX));
    sentencew.display_label = GTK_LABEL (gtk_builder_get_object (builder, SENTENCE_LABEL));
    sentencew.image = GTK_IMAGE (gtk_builder_get_object (builder, IMAGE));
+   sentencew.statusbar = GTK_WIDGET (gtk_builder_get_object (builder, STATUSBAR));
+   keyboard.table = GTK_CONTAINER (gtk_builder_get_object (builder, KEYBOARD));
+   keyboard.keys = gtk_container_get_children (keyboard.table);
+   keyboard.index = keyboard.keys;
 
    gtk_builder_connect_signals (builder,NULL);
    g_object_unref (G_OBJECT(builder));
@@ -186,11 +210,10 @@ main (int argc,
    gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, FALSE, 1);
    gtk_box_reorder_child (GTK_BOX (vbox), menubar, 0);
 
-   get_sentence_action(NULL,0,NULL);
-    
    gtk_widget_show_all (window);
    
-   /* Load intro image for the game. */
+   /* Prepares game. */
+   get_sentence_action(NULL,0,NULL);
    load_image(TUX_IMG_0);
    sentencew.n_img ++;
 
@@ -222,13 +245,21 @@ get_sentence_action (GtkRadioAction *raction,
    gsize length = 0;
    gint random = 0;
 
-   // XXX Call FUNCTION to enable ALL buttons
+   /* Not first game => Reset values and prepares new game. */
+   if (!sentencew.first_game)
+   {
+      sentencew.valid_chars = NULL;
+      sentencew.n_img = 0;
+      load_image(TUX_IMG_0);
+      set_keyboard_active (TRUE);
+   }
 
    /* Select the file. */
    switch (gtk_radio_action_get_current_value (curr_raction))
    {
       case 0:
          file = g_file_new_for_path (FILMS_FILE);
+         /* XXX Status Bar */
          break;
 
       case 1:
@@ -276,8 +307,8 @@ format_sentence_with_letter (GtkToggleButton *button, gpointer data)
    gint valid_letter = 0;
    gchar *letter = NULL;
 	
-   /* Leaves the button pressed (activated). */
-   gtk_toggle_button_set_active (button, TRUE);
+   /* Make button unsensitive. */
+   gtk_widget_set_sensitive(GTK_WIDGET(button),FALSE);
 
    label = gtk_button_get_label (GTK_BUTTON (button)); 
    letter = g_strdup (label);
@@ -304,12 +335,27 @@ format_sentence_with_letter (GtkToggleButton *button, gpointer data)
    { 
       load_image (g_strdup_printf("../img%i.png",sentencew.n_img));
       sentencew.n_img ++;
-      /* Deactivation of all buttons. */
+      /* Desable the use of the keys */
       if (sentencew.n_img == NUM_IMAGES)
-         gtk_label_set_text (sentencew.display_label, "\nOhhh, that was close, try again!"); 
-         //XXX Call Function for desable ALL buttons
+      {
+         gtk_label_set_text (sentencew.display_label, "Ohhh, that was close. Try again!.\n Select a theme from the menu."); 
+         set_keyboard_active (FALSE);
+         sentencew.first_game = 0;
+      }
    }
 
+}
+
+/* Enables or desables keyboardi's keys. */
+static void
+set_keyboard_active (gboolean active)
+{
+   while (keyboard.index != NULL)
+   {
+      gtk_widget_set_sensitive (GTK_WIDGET (keyboard.index->data), active);
+      keyboard.index = keyboard.index->next;
+   }
+   keyboard.index = keyboard.keys;
 }
 
 /* Loads an image for the GtkImage central area. */
@@ -365,7 +411,7 @@ about_action (GtkAction *action,
   
   dialog = gtk_about_dialog_new ();
   
-  //XXX this is not the definitive image
+  /* XXX this is not the definitive image */
   logo = gdk_pixbuf_new_from_file (TUX_IMG_0, &error);
 
   /* Set the application logo or handle the error. */
@@ -391,8 +437,8 @@ about_action (GtkAction *action,
   gtk_about_dialog_set_comments (GTK_ABOUT_DIALOG (dialog), 
                                  "GHangTux is a variation of the popular Hangman game.");
 
-  //XXX Need to load the file with the text here
-  //XXX Use #define for texts!!
+  /* XXX Need to load the file with the text here */
+  /* XXX Use #define for texts!! */
   gtk_about_dialog_set_license (GTK_ABOUT_DIALOG (dialog), 
                                 "Free: (TODO: look for the right text).");
   gtk_about_dialog_set_website (GTK_ABOUT_DIALOG (dialog), 

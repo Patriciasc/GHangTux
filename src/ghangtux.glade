@@ -24,6 +24,7 @@
               </object>
               <packing>
                 <property name="expand">False</property>
+                <property name="padding">10</property>
                 <property name="position">0</property>
               </packing>
             </child>
@@ -43,17 +44,17 @@
                 <property name="n_columns">13</property>
                 <property name="homogeneous">True</property>
                 <child>
-                  <object class="GtkToggleButton" id="button_a">
+                  <object class="GtkButton" id="button_a">
                     <property name="label" translatable="yes">_A</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_underline">True</property>
-                    <signal name="clicked" handler="format_sentence_with_letter"/>
+                    <signal name="activate" handler="format_sentence_with_letter"/>
                   </object>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_b">
+                  <object class="GtkButton" id="button_b">
                     <property name="label" translatable="yes">_B</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -67,7 +68,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_c">
+                  <object class="GtkButton" id="button_c">
                     <property name="label" translatable="yes">_C</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -81,7 +82,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_d">
+                  <object class="GtkButton" id="button_d">
                     <property name="label" translatable="yes">_D</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -95,7 +96,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_e">
+                  <object class="GtkButton" id="button_e">
                     <property name="label" translatable="yes">_E</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -109,7 +110,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_f">
+                  <object class="GtkButton" id="button_f">
                     <property name="label" translatable="yes">_F</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -123,7 +124,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_g">
+                  <object class="GtkButton" id="button_g">
                     <property name="label" translatable="yes">_G</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -137,7 +138,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_h">
+                  <object class="GtkButton" id="button_h">
                     <property name="label" translatable="yes">_H</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -151,7 +152,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_v">
+                  <object class="GtkButton" id="button_v">
                     <property name="label" translatable="yes">_V</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -167,7 +168,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_n">
+                  <object class="GtkButton" id="button_n">
                     <property name="label" translatable="yes">_N</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -181,7 +182,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_i">
+                  <object class="GtkButton" id="button_i">
                     <property name="label" translatable="yes">_I</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -195,7 +196,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_o">
+                  <object class="GtkButton" id="button_o">
                     <property name="label" translatable="yes">_O</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -211,7 +212,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_p">
+                  <object class="GtkButton" id="button_p">
                     <property name="label" translatable="yes">_P</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -227,7 +228,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_q">
+                  <object class="GtkButton" id="button_q">
                     <property name="label" translatable="yes">_Q</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -243,7 +244,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_r">
+                  <object class="GtkButton" id="button_r">
                     <property name="label" translatable="yes">_R</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -259,7 +260,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_s">
+                  <object class="GtkButton" id="button_s">
                     <property name="label" translatable="yes">_S</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -275,7 +276,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_t">
+                  <object class="GtkButton" id="button_t">
                     <property name="label" translatable="yes">_T</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -291,7 +292,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_u">
+                  <object class="GtkButton" id="button_u">
                     <property name="label" translatable="yes">_U</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -307,7 +308,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_j">
+                  <object class="GtkButton" id="button_j">
                     <property name="label" translatable="yes">_J</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -321,7 +322,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_k">
+                  <object class="GtkButton" id="button_k">
                     <property name="label" translatable="yes">_K</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -335,7 +336,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_l">
+                  <object class="GtkButton" id="button_l">
                     <property name="label" translatable="yes">_L</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -349,7 +350,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_m">
+                  <object class="GtkButton" id="button_m">
                     <property name="label" translatable="yes">_M</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -363,7 +364,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_w">
+                  <object class="GtkButton" id="button_w">
                     <property name="label" translatable="yes">_W</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -379,7 +380,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_x">
+                  <object class="GtkButton" id="button_x">
                     <property name="label" translatable="yes">_X</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -395,7 +396,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_y">
+                  <object class="GtkButton" id="button_y">
                     <property name="label" translatable="yes">_Y</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -411,7 +412,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="button_z">
+                  <object class="GtkButton" id="button_z">
                     <property name="label" translatable="yes">_Z</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
