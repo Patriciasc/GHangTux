@@ -259,7 +259,7 @@ get_sentence_action (GtkRadioAction *raction,
 
    /* Status bar context. */
    gamew.context = gtk_statusbar_get_context_id (GTK_STATUSBAR (gamew.statusbar),
-                                                 "Statusbar example");
+                                                 "Statusbar");
    /* Select the file. */
    switch (gtk_radio_action_get_current_value (curr_raction))
    {
@@ -343,10 +343,17 @@ format_sentence_with_letter (GtkToggleButton *button, gpointer data)
    { 
       load_image (g_strdup_printf("../img%i.png",gamew.n_img));
       gamew.n_img ++;
-      /* Desable the use of the keys */
+
       if (gamew.n_img == NUM_IMAGES)
       {
          gtk_label_set_text (gamew.display_label, "Ohhh, that was close. Try again!.\n Select a theme from the menu."); 
+         
+         /* Change status bar state. */
+         gamew.context = gtk_statusbar_get_context_id (GTK_STATUSBAR (gamew.statusbar),
+                                                 "Statusbar");
+         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "End of game. Try again!");
+
+         /* Desable the use of the keys. */
          set_keyboard_active (FALSE);
          gamew.first_game = 0;
       }
