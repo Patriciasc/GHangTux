@@ -123,8 +123,11 @@ static const guint NUM_ACTIONS = G_N_ELEMENTS (actions);
 /* --------------  END: list of actions  ----------------*/
 /* --------------------------------------------------------*/
 
+typedef struct _GameWidget Gamewidget;
+typedef struct _Keyboard   Keyboard;
+
 /* Actual display sentence management. */
-struct GameWidget
+struct _GameWidget
 {
    gchar *sentence;           /* games's sentence */
    gchar *display_sentence;   /* displayed sentence */
@@ -135,7 +138,7 @@ struct GameWidget
    gboolean first_game;       /* indicates if the current game is the first */
    GtkWidget *statusbar;      /* game status bar */
    gint scontext;             /* game status bar's context */
-} gamew;
+};
 
 /* Keyboard management */
 struct _Keyboard
@@ -143,7 +146,10 @@ struct _Keyboard
    GtkContainer *table;
    GList *keys;
    GList *index;
-} keyboard;
+};
+
+Gamewidget gamew;
+Keyboard keyboard;
 
 int
 main (int argc,
@@ -319,6 +325,7 @@ format_sentence_with_letter (GtkToggleButton *button, gpointer data)
    gint i = 0;
    gint valid_letter = 0;
    gchar *letter = NULL;
+   gchar *markup = NULL;
 	
    /* Make button unsensitive. */
    gtk_widget_set_sensitive(GTK_WIDGET(button),FALSE);
@@ -351,7 +358,10 @@ format_sentence_with_letter (GtkToggleButton *button, gpointer data)
 
       if (gamew.n_img == NUM_IMAGES)
       {
-         gtk_label_set_text (gamew.display_label, "Ohhh, that was close. Try again!.\n Select a theme from the menu."); 
+         /* Format displayed text */
+         markup = g_markup_printf_escaped ("<span weight=\"ultrabold\" size=\"medium\">%s</span>", 
+                     "That was close. Try again!.\nSelect a theme from the Game menu.");
+         gtk_label_set_markup(gamew.display_label, markup); 
          
          /* Change status bar state. */
          gamew.scontext = gtk_statusbar_get_context_id (GTK_STATUSBAR (gamew.statusbar),
@@ -361,6 +371,7 @@ format_sentence_with_letter (GtkToggleButton *button, gpointer data)
          /* Desable the use of the keys. */
          set_keyboard_active (FALSE);
          gamew.first_game = 0;
+         g_free (markup);
       }
    }
 
