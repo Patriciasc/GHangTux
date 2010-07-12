@@ -20,3 +20,22 @@ S T A R
 M O O N
 S U N
 R A I N B O W
+P A L M   T R E E
+K E Y B O A R D
+B O A T
+B E A C H
+B L A N K E T S
+P I L L O W
+R U B B E R
+S A N D A L S
+W A S H M A S H I N E
+V A C U U M   C L E A N E R
+S P A C E   S H I P
+T E L E S C O P E
+F L O W E R P O T
+B A L L O O N
+C O N T A I N E R
+K E T T L E
+K N I F E
+S P O O N
+P O T

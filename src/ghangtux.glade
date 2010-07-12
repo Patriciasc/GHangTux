@@ -50,7 +50,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_underline">True</property>
-                    <signal name="activate" handler="format_sentence_with_letter"/>
+                    <signal name="clicked" handler="format_sentence_with_letter"/>
                   </object>
                 </child>
                 <child>

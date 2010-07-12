@@ -15,7 +15,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define TUX_IMG_0 "../Tux0.png"
+#define TUX_IMG_0 "../tux_images/Tux0.png"
 #define FILMS_FILE "../films.txt"
 #define OBJECTS_FILE "../objects.txt"
 #define PERSONS_FILE "../persons.txt"
@@ -33,15 +33,15 @@
 #define SENTENCE_LABEL "for_sentence_label"
 
 #define MIN_RANDOM 1
-#define MAX_RANDOM 2
-#define NUM_IMAGES 5
+#define MAX_RANDOM 41
+#define NUM_IMAGES 8
 
 void main_win_destroy (GtkObject *window, gpointer data);
 static void get_sentence_action (GtkRadioAction *raction,
                                  GtkRadioAction *curr_raction, gpointer data);
 static void quit_action (GtkAction *action, gpointer data);
 static void about_action (GtkAction *action, gpointer data);
-void format_sentence_with_letter (GtkToggleButton *button, gpointer data);
+void format_sentence_with_letter (GtkButton *button, gpointer data);
 static void load_image (const char *file_image);
 static void set_keyboard_active (gboolean active);
 
@@ -240,9 +240,6 @@ void
 main_win_destroy (GtkObject *window, 
                   gpointer data)
 {
-   g_print ("\n--------------------------------------------------------------------\n\n");
-   g_print ("\n- Leaving the application. Thank you for playing with GHangTux. -\n\n");
-   g_print ("\n--------------------------------------------------------------------\n\n");
    gtk_main_quit();
 }
 
@@ -263,8 +260,8 @@ get_sentence_action (GtkRadioAction *raction,
    if (!gamew.first_game)
    {
       gamew.valid_chars = NULL;
-      gamew.n_img = 0;
       load_image(TUX_IMG_0);
+      gamew.n_img = 1;
       set_keyboard_active (TRUE);
    }
 
@@ -319,7 +316,7 @@ get_sentence_action (GtkRadioAction *raction,
 
 /* Formats the sentence with a new letter for displaying. */
 void
-format_sentence_with_letter (GtkToggleButton *button, gpointer data)
+format_sentence_with_letter (GtkButton *button, gpointer data)
 {
    const gchar *label = NULL;
    gint i = 0;
@@ -353,20 +350,19 @@ format_sentence_with_letter (GtkToggleButton *button, gpointer data)
    /* Loads a new image of the Hangtux. */
    else
    { 
-      load_image (g_strdup_printf("../img%i.png",gamew.n_img));
+      load_image (g_strdup_printf("../tux_images/Tux%i.png",gamew.n_img));
       gamew.n_img ++;
 
       if (gamew.n_img == NUM_IMAGES)
       {
-         /* Format displayed text */
-         markup = g_markup_printf_escaped ("<span weight=\"ultrabold\" size=\"medium\">%s</span>", 
-                     "That was close. Try again!.\nSelect a theme from the Game menu.");
-         gtk_label_set_markup(gamew.display_label, markup); 
-         
+         gtk_label_set_text (gamew.display_label, " ");
+         load_image("../tux_images/final.png");
+
          /* Change status bar state. */
          gamew.scontext = gtk_statusbar_get_context_id (GTK_STATUSBAR (gamew.statusbar),
-                                                 "Statusbar");
-         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "End of game. Try again!");
+                                                        "Statusbar");
+         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), 
+                             GPOINTER_TO_INT (data), "End of game. Try again!");
 
          /* Desable the use of the keys. */
          set_keyboard_active (FALSE);
