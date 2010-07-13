@@ -1,0 +1,67 @@
+                                    GHangtux
+                                   version 0.1
+
+                         A version of the Hangman game
+                    Copyright 2010 by Patricia Santana Cruz
+                                 Openismus GmbH
+
+                            patriciasc@openismus.com
+
+                                    Juli 2010
+
+     ----------------------------------------------------------------------
+
+   +-------------------------------------------+
+   |             Table of Contents             |
+   |-------------------------------------------|
+   |  * About                                  |
+   |  * Using GHangtux                         |
+   +-------------------------------------------+
+
+     ----------------------------------------------------------------------
+
+                                     About
+
+What Is 'GHangtux?'
+
+       GHangtux is a free program variation of the popular Hangman game.
+       It has been designed for people of all ages and has a simple, 
+       easy-to-use interface.
+
+       It provides a keyboard and a sentence/word to guess, whose theme 
+       the player is able to select. Current themes are: films, objects 
+       and persons.
+
+       A graphic sequence of tux images will be displayed during the game,
+       indicating the player how many attempts he/she has left.
+
+
+License:
+
+       GHangtux is an Open Source project, Free Software released under the
+       GNU General Public License (GPL). It is free, and the 'source code'
+       behind the program is available. (This allows others to add features,
+       fix bugs, and use parts of the program in their own GPL'd software.)
+
+       See COPYING.txt for the full text of the GPL license.
+ 
+
+                                Using GHangtux
+
+How To Play 'GHangtux?'
+
+       GHangman is a game for one player. A sentence/word will be displayed 
+       and the player can try to guess it by suggesting letters.
+
+       The sentence/word to guess is represented by a row of dashes, giving 
+       the number of letters. If the player suggests a letter which occurs 
+       in the word, it will be displayed in all its correct positions. 
+       If the suggested letter does not occur in the word, a new image of
+       Tux will be shown. The game is over when:
+
+          * The player completes the sentence/word.
+          * All Tux images has been shown. 
+
+
+Loading 'GHangtux'
+                               -- COMING SOON --

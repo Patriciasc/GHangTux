@@ -436,6 +436,11 @@ about_action (GtkAction *action,
     NULL
   };
   
+  const gchar *art_work[] = {
+     "Tux images in this game, are based on Wikimedia:\nhttp://commons.wikimedia.org/wiki/File:Tux-G2.png\nby Jan Vansteenkiste.",
+     NULL
+  };
+     
   dialog = gtk_about_dialog_new ();
   
   /* XXX this is not the definitive image */
@@ -477,6 +482,8 @@ about_action (GtkAction *action,
   gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG (dialog), documenters);
   gtk_about_dialog_set_translator_credits (GTK_ABOUT_DIALOG (dialog), 
                                            TRANSLATOR);
+  gtk_about_dialog_set_artists (GTK_ABOUT_DIALOG (dialog), art_work); 
+
 
   gtk_dialog_run (GTK_DIALOG (dialog));
   gtk_widget_destroy (dialog);
