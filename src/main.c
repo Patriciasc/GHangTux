@@ -32,14 +32,14 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define TUX_IMG_0 "../tux_images/Tux0.png"
-#define FILMS_FILE "../films.txt"
-#define OBJECTS_FILE "../objects.txt"
-#define PERSONS_FILE "../persons.txt"
-#define TRANSLATOR "Patricia Santana Cruz"
+#define TUX_IMG_0 "../data/images/Tux0.png"
+#define FILMS_FILE "../data/themes/films.txt"
+#define OBJECTS_FILE "../data/themes/objects.txt"
+#define PERSONS_FILE "../data/themes/persons.txt"
 
 #define GUI_FILE "ghangtux.glade"
 #define UI_FILE "menu.ui"
+
 #define ACTION_GROUP "MainActionGroup"
 #define WIN "main_win"
 #define VBOX "vbox"
@@ -48,6 +48,8 @@
 #define STATUSBAR "statusbar"
 #define KEYBOARD "keyboard_EN"
 #define SENTENCE_LABEL "for_sentence_label"
+
+#define TRANSLATOR "Patricia Santana Cruz"
 
 #define MIN_RANDOM 1
 #define MAX_RANDOM 41
@@ -367,13 +369,13 @@ format_sentence_with_letter (GtkButton *button, gpointer data)
    /* Loads a new image of the Hangtux. */
    else
    { 
-      load_image (g_strdup_printf("../tux_images/Tux%i.png",gamew.n_img));
+      load_image (g_strdup_printf("../data/images/Tux%i.png",gamew.n_img));
       gamew.n_img ++;
 
       if (gamew.n_img == NUM_IMAGES)
       {
          gtk_label_set_text (gamew.display_label, " ");
-         load_image("../tux_images/final.png");
+         load_image("../data/images/final.png");
 
          /* Change status bar state. */
          gamew.scontext = gtk_statusbar_get_context_id (GTK_STATUSBAR (gamew.statusbar),
