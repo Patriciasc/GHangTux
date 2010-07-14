@@ -22,6 +22,9 @@
  * #                                                                      #
  * # You should have received a copy of the GNU General Public License    #
  * # along with this program. If not, see <http://www.gnu.org/licenses/>. #
+ * #                                                                      #
+ * # Compile with: gcc -Wall -pedantic -Werror -g main.c -o ghangtux \    #
+ *               `pkg-config --cflags --libs gtk+-2.0 gmodule-export-2.0` #
  * ########################################################################
 */
 
@@ -31,14 +34,15 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <string.h>
 #include <stdlib.h>
+#include "config.h"
 
 #define TUX_IMG_0 "../data/images/Tux0.png"
 #define FILMS_FILE "../data/themes/films.txt"
 #define OBJECTS_FILE "../data/themes/objects.txt"
 #define PERSONS_FILE "../data/themes/persons.txt"
 
-#define GUI_FILE "ghangtux.glade"
-#define UI_FILE "menu.ui"
+#define GUI_FILE "../data/ui/ghangtux.glade"
+#define UI_FILE "../data/ui/menu.ui"
 
 #define ACTION_GROUP "MainActionGroup"
 #define WIN "main_win"
