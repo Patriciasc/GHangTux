@@ -22,9 +22,6 @@
  * #                                                                      #
  * # You should have received a copy of the GNU General Public License    #
  * # along with this program. If not, see <http://www.gnu.org/licenses/>. #
- * #                                                                      #
- * # Compile with: gcc -Wall -pedantic -Werror -g main.c -o ghangtux \    #
- *               `pkg-config --cflags --libs gtk+-2.0 gmodule-export-2.0` #
  * ########################################################################
 */
 
@@ -55,14 +52,19 @@
 
 #define MIN_RANDOM 1
 #define MAX_RANDOM 41
-#define NUM_IMAGES 8
+#define NUM_IMAGES 7
 
+/* Callbacks for signals. */
 void main_win_destroy (GtkObject *window, gpointer data);
+void format_sentence_with_letter (GtkButton *button, gpointer data);
+
+/* Callbacks for actions. */
+static void quit_action (GtkAction *action, gpointer data);
 static void get_sentence_action (GtkRadioAction *raction,
                                  GtkRadioAction *curr_raction, gpointer data);
-static void quit_action (GtkAction *action, gpointer data);
 static void about_action (GtkAction *action, gpointer data);
-void format_sentence_with_letter (GtkButton *button, gpointer data);
+
+/* Auxiliary functions. */
 static void load_image (const char *file_image);
 static void set_keyboard_active (gboolean active);
 static gchar *get_system_file (const gchar *filename);
@@ -84,14 +86,14 @@ static GtkRadioActionEntry radio_actions[] =
     NULL, 
     "_Objects", 
     "<Ctrl><Shift>o", 
-    "Select a random object", 
+    "Selects a random object", 
     1},
 
   { "PersonsThemesMenuAction", 
     NULL, 
     "_Person_s", 
     "<Ctrl><Shift>p", 
-    "Select a random person", 
+    "Selects a random person", 
     2}
 };
 
@@ -183,6 +185,7 @@ main (int argc,
    GtkWidget *menubar = NULL;
    GtkActionGroup *def_group = NULL;
    GtkUIManager *uimanager = NULL;
+   GtkRadioAction *raction_init = NULL;
    GError *error = NULL;
 
    gamew.sentence = NULL;
@@ -249,7 +252,9 @@ main (int argc,
    gtk_widget_show_all (window);
    
    /* Prepares game. */
-   get_sentence_action(NULL,0,NULL);
+   /* get_sentence_action(NULL,0,NULL); */
+   raction_init = gtk_radio_action_new ("init", "init", "init", "init", 0);
+   get_sentence_action(NULL,raction_init,NULL); 
    load_image(get_system_file(TUX_IMG_0));
    gamew.n_img ++;
 
@@ -257,9 +262,9 @@ main (int argc,
    return 0;
 } 
 
-/******************
- * START: Signals *
- * ****************/
+/********************************
+ * START: Callbakcs for signals *
+ * ******************************/
 
 /* Destroy main window. */
 void 
@@ -305,13 +310,15 @@ format_sentence_with_letter (GtkButton *button, gpointer data)
    /* Loads a new image of the Hangtux. */
    else
    { 
-      load_image (get_system_file(g_strdup_printf("images/Tux%i.png",gamew.n_img)));
-      gamew.n_img ++;
-
-      if (gamew.n_img == NUM_IMAGES)
+      if (gamew.n_img < NUM_IMAGES)
       {
+         load_image (get_system_file(g_strdup_printf("images/Tux%i.png",gamew.n_img)));
+         gamew.n_img++;
+      }
+      else
+      {
+         load_image (get_system_file("images/Tux7.png"));
          gtk_label_set_text (gamew.display_label, " ");
-         load_image(get_system_file("images/final.png"));
 
          /* Change status bar state. */
          gamew.scontext = gtk_statusbar_get_context_id (GTK_STATUSBAR (gamew.statusbar),
@@ -327,13 +334,13 @@ format_sentence_with_letter (GtkButton *button, gpointer data)
    }
 }
 
-/****************
- * END: Signals *
- * **************/
+/******************************
+ * END: Callbacks for signals *
+ * ****************************/
 
-/******************
- * START: Actions *
- * ****************/
+/********************************
+ * START: Callbacks for actions *
+ * ******************************/
 
 /* Quits the application from the menu. */
 static void
@@ -486,9 +493,9 @@ about_action (GtkAction *action,
   gtk_widget_destroy (dialog);
 }
 
-/****************
- * END: Actions *
- * **************/
+/******************************
+ * END: Callbacks for actions *
+ * ****************************/
 
 /******************************
  * START: Auxiliary functions *

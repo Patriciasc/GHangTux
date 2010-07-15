@@ -13,7 +13,7 @@ dist_images_DATA = data/images/Tux0.png \
                    data/images/Tux4.png \
                    data/images/Tux5.png \
                    data/images/Tux6.png \
-                   data/images/final.png 
+                   data/images/Tux7.png 
 
 uidir = $(pkgdatadir)/ui
 dist_ui_DATA = data/ui/ghangtux.glade \
