@@ -36,24 +36,22 @@
 #include <stdlib.h>
 #include "config.h"
 
-#define TUX_IMG_0 "../data/images/Tux0.png"
-#define FILMS_FILE "../data/themes/films.txt"
-#define OBJECTS_FILE "../data/themes/objects.txt"
-#define PERSONS_FILE "../data/themes/persons.txt"
+#define TUX_IMG_0 "images/Tux0.png"
+#define FILMS_FILE "themes/films.txt"
+#define OBJECTS_FILE "themes/objects.txt"
+#define PERSONS_FILE "themes/persons.txt"
 
-#define GUI_FILE "../data/ui/ghangtux.glade"
-#define UI_FILE "../data/ui/menu.ui"
+#define GUI_FILE "ui/ghangtux.glade"
+#define UI_FILE "ui/menu.ui"
 
 #define ACTION_GROUP "MainActionGroup"
+#define SENTENCE_LABEL "for_sentence_label"
 #define WIN "main_win"
 #define VBOX "vbox"
 #define MENU "/MainMenu"
 #define IMAGE "hangtux_area"
 #define STATUSBAR "statusbar"
 #define KEYBOARD "keyboard_EN"
-#define SENTENCE_LABEL "for_sentence_label"
-
-#define TRANSLATOR "Patricia Santana Cruz"
 
 #define MIN_RANDOM 1
 #define MAX_RANDOM 41
@@ -67,6 +65,7 @@ static void about_action (GtkAction *action, gpointer data);
 void format_sentence_with_letter (GtkButton *button, gpointer data);
 static void load_image (const char *file_image);
 static void set_keyboard_active (gboolean active);
+static gchar *get_system_file (const gchar *filename);
 
 /* --------------------------------------------------------*/
 /* --------------  START: list of actions  ----------------*/
@@ -204,10 +203,10 @@ main (int argc,
    
    /* Setting up the builder. */
    builder = gtk_builder_new();
-
-   if (!gtk_builder_add_from_file (builder, GUI_FILE, &error))
+   
+   if (!gtk_builder_add_from_file (builder, get_system_file (GUI_FILE), &error))
    {
-     g_message ("%s", error->message);
+     g_message ("Building builder failed: %s\n", error->message);
      g_error_free (error);
      return 1;
    }
@@ -233,9 +232,9 @@ main (int argc,
    uimanager = gtk_ui_manager_new ();
    gtk_ui_manager_insert_action_group (uimanager, def_group, 0);
    
-   if (!gtk_ui_manager_add_ui_from_file (uimanager, UI_FILE, &error))
+   if (!gtk_ui_manager_add_ui_from_file (uimanager, get_system_file (UI_FILE), &error))
    {
-      g_message ("Building menus failed: %s", error->message);
+      g_message ("Building menus failed: %s\n", error->message);
       g_error_free (error);
       return 1;
    }
@@ -251,12 +250,16 @@ main (int argc,
    
    /* Prepares game. */
    get_sentence_action(NULL,0,NULL);
-   load_image(TUX_IMG_0);
+   load_image(get_system_file(TUX_IMG_0));
    gamew.n_img ++;
 
    gtk_main();
    return 0;
 } 
+
+/******************
+ * START: Signals *
+ * ****************/
 
 /* Destroy main window. */
 void 
@@ -264,77 +267,6 @@ main_win_destroy (GtkObject *window,
                   gpointer data)
 {
    gtk_main_quit();
-}
-
-/* Selects a random sentence or word from the game files. */
-static void
-get_sentence_action (GtkRadioAction *raction,
-                     GtkRadioAction *curr_raction,
-                     gpointer data)
-{
-   GFile *file = NULL;
-   GError *error = NULL;
-   GFileInputStream *fstream = NULL; 
-   GDataInputStream *stream = NULL;
-   gsize length = 0;
-   gint random = 0;
-
-   /* Not first game => Reset values and prepares new game. */
-   if (!gamew.first_game)
-   {
-      gamew.valid_chars = NULL;
-      load_image(TUX_IMG_0);
-      gamew.n_img = 1;
-      set_keyboard_active (TRUE);
-   }
-
-   /* Status bar context. */
-   gamew.scontext = gtk_statusbar_get_context_id (
-                    GTK_STATUSBAR (gamew.statusbar),"Statusbar");
-   /* Select the file. */
-   switch (gtk_radio_action_get_current_value (curr_raction))
-   {
-      case 0:
-         file = g_file_new_for_path (FILMS_FILE);
-         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Films");
-         break;
-
-      case 1:
-         file = g_file_new_for_path (OBJECTS_FILE);
-         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Objects");
-         break;
-
-      case 2:
-         file = g_file_new_for_path (PERSONS_FILE);
-         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Persons");
-         break;
-
-      default:
-         g_print ("Creating GFIle failed\n");
-   }
-   
-   if (!(fstream = g_file_read (file, NULL, &error)))
-   {
-      g_message ("Creating file stream error: %s", error->message);
-      g_error_free (error);
-   }
-
-   stream = g_data_input_stream_new (G_INPUT_STREAM(fstream));
-
-   /* Select a random sentence from the file. */
-   random = g_random_int_range (MIN_RANDOM, MAX_RANDOM);
-
-   while (((gamew.sentence = g_data_input_stream_read_line (stream, &length, NULL, 
-            &error)) != NULL) && (random != 0))
-   {
-      random--;
-   }
-   
-   /* Format the sentence for displaying the first time. */
-   gamew.display_sentence = g_strdup (gamew.sentence);
-   gamew.valid_chars = " ";
-   g_strcanon ( gamew.display_sentence, gamew.valid_chars, '_');
-   gtk_label_set_text (gamew.display_label, gamew.display_sentence);
 }
 
 /* Formats the sentence with a new letter for displaying. */
@@ -373,13 +305,13 @@ format_sentence_with_letter (GtkButton *button, gpointer data)
    /* Loads a new image of the Hangtux. */
    else
    { 
-      load_image (g_strdup_printf("../data/images/Tux%i.png",gamew.n_img));
+      load_image (get_system_file(g_strdup_printf("images/Tux%i.png",gamew.n_img)));
       gamew.n_img ++;
 
       if (gamew.n_img == NUM_IMAGES)
       {
          gtk_label_set_text (gamew.display_label, " ");
-         load_image("../data/images/final.png");
+         load_image(get_system_file("images/final.png"));
 
          /* Change status bar state. */
          gamew.scontext = gtk_statusbar_get_context_id (GTK_STATUSBAR (gamew.statusbar),
@@ -393,7 +325,197 @@ format_sentence_with_letter (GtkButton *button, gpointer data)
          g_free (markup);
       }
    }
+}
 
+/****************
+ * END: Signals *
+ * **************/
+
+/******************
+ * START: Actions *
+ * ****************/
+
+/* Quits the application from the menu. */
+static void
+quit_action (GtkAction *action,
+             gpointer data)
+{
+   main_win_destroy (NULL,NULL);
+}
+
+/* Selects a random sentence or word from the game files. */
+static void
+get_sentence_action (GtkRadioAction *raction,
+                     GtkRadioAction *curr_raction,
+                     gpointer data)
+{
+   GFile *file = NULL;
+   GError *error = NULL;
+   GFileInputStream *fstream = NULL; 
+   GDataInputStream *stream = NULL;
+   gsize length = 0;
+   gint random = 0;
+
+   /* Not first game => Reset values and prepares new game. */
+   if (!gamew.first_game)
+   {
+      gamew.valid_chars = NULL;
+      load_image(get_system_file (TUX_IMG_0));
+      gamew.n_img = 1;
+      set_keyboard_active (TRUE);
+   }
+
+   /* Status bar context. */
+   gamew.scontext = gtk_statusbar_get_context_id (
+                    GTK_STATUSBAR (gamew.statusbar),"Statusbar");
+   /* Select the file. */
+   switch (gtk_radio_action_get_current_value (curr_raction))
+   {
+      case 0:
+         file = g_file_new_for_path (get_system_file(FILMS_FILE));
+         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Films");
+         break;
+
+      case 1:
+         file = g_file_new_for_path (get_system_file (OBJECTS_FILE));
+         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Objects");
+         break;
+
+      case 2:
+         file = g_file_new_for_path (get_system_file(PERSONS_FILE));
+         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Persons");
+         break;
+
+      default:
+         g_print ("Creating GFIle failed\n");
+   }
+   
+   if (!(fstream = g_file_read (file, NULL, &error)))
+   {
+      g_message ("Creating file stream error: %s", error->message);
+      g_error_free (error);
+   }
+
+   stream = g_data_input_stream_new (G_INPUT_STREAM(fstream));
+
+   /* Select a random sentence from the file. */
+   random = g_random_int_range (MIN_RANDOM, MAX_RANDOM);
+
+   while (((gamew.sentence = g_data_input_stream_read_line (stream, &length, NULL, 
+            &error)) != NULL) && (random != 0))
+   {
+      random--;
+   }
+   
+   /* Format the sentence for displaying the first time. */
+   gamew.display_sentence = g_strdup (gamew.sentence);
+   gamew.valid_chars = " ";
+   g_strcanon ( gamew.display_sentence, gamew.valid_chars, '_');
+   gtk_label_set_text (gamew.display_label, gamew.display_sentence);
+}
+
+/* Shows an about dialog from the application. */
+static void
+about_action (GtkAction *action,
+              gpointer data){
+
+  GtkWidget *dialog;
+  GdkPixbuf *logo;
+  GError *error = NULL;
+
+  const gchar *authors[] = {
+    "Patricia Santana Cruz", 
+    NULL
+  };
+
+  const gchar *documenters[] = {
+    "Patricia Santana Cruz",
+    NULL
+  };
+  
+  const gchar *art_work[] = {
+     "Tux images in this game, are based on Wikimedia:\nhttp://commons.wikimedia.org/wiki/File:Tux-G2.png\nby Jan Vansteenkiste.",
+     NULL
+  };
+     
+  dialog = gtk_about_dialog_new ();
+  
+  /* XXX this is not the definitive image */
+  logo = gdk_pixbuf_new_from_file (get_system_file (TUX_IMG_0), &error);
+
+  /* Set the application logo or handle the error. */
+  if (error == NULL)
+    gtk_about_dialog_set_logo (GTK_ABOUT_DIALOG (dialog), logo);
+  else
+  {
+    if (error->domain == GDK_PIXBUF_ERROR)
+      g_print ("GdkPixbufError: %s\n", error->message);
+    else if (error->domain == G_FILE_ERROR)
+      g_print ("GFileError: %s\n", error->message);
+    else
+      g_print ("An error in the unexpected domain:%d has occurred!\n", error->domain);
+
+    g_error_free (error);
+  }
+
+  /* Set application data that will be displayed in the main dialog. */
+  gtk_about_dialog_set_program_name (GTK_ABOUT_DIALOG (dialog), "GHangTux");
+  gtk_about_dialog_set_version (GTK_ABOUT_DIALOG (dialog), "0.1");
+  gtk_about_dialog_set_copyright (GTK_ABOUT_DIALOG (dialog), 
+                                  " Copyright (C) 2010 Openismus GmbH");
+  gtk_about_dialog_set_comments (GTK_ABOUT_DIALOG (dialog), 
+                                 "GHangTux is a variation of the popular Hangman game.");
+
+  /* XXX Need to load the file with the text here */
+  /* XXX Use #define for texts!! */
+  gtk_about_dialog_set_license (GTK_ABOUT_DIALOG (dialog), 
+                                "Free: (TODO: look for the right text).");
+  gtk_about_dialog_set_website (GTK_ABOUT_DIALOG (dialog), 
+                                "http://github.com/Patriciasc/GHangTux");
+  gtk_about_dialog_set_website_label (GTK_ABOUT_DIALOG (dialog), 
+                                      "http://github.com/Patriciasc/GHangTux");
+
+  gtk_about_dialog_set_authors (GTK_ABOUT_DIALOG (dialog), authors);
+  gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG (dialog), documenters);
+  gtk_about_dialog_set_translator_credits (GTK_ABOUT_DIALOG (dialog), 
+                                           "Patricia Santana Cruz");
+  gtk_about_dialog_set_artists (GTK_ABOUT_DIALOG (dialog), art_work); 
+
+
+  gtk_dialog_run (GTK_DIALOG (dialog));
+  gtk_widget_destroy (dialog);
+}
+
+/****************
+ * END: Actions *
+ * **************/
+
+/******************************
+ * START: Auxiliary functions *
+ * ****************************/
+
+/* Gets user's system files. */
+static gchar *
+get_system_file (const gchar *filename)
+{
+   gchar *pathname;
+   const gchar* const *system_data_dirs;
+   
+   /* Iterate over array of strings to find system data files. */
+   for (system_data_dirs = g_get_system_data_dirs (); *system_data_dirs != NULL; system_data_dirs++)
+   {
+      pathname = g_build_filename (*system_data_dirs, PACKAGE_TARNAME, filename, NULL);
+      if (g_file_test (pathname, G_FILE_TEST_EXISTS))
+      {
+         break;
+      }
+      else
+      {
+         g_free (pathname);
+         pathname = NULL;
+      }
+   }
+   return pathname;
 }
 
 /* Enables or desables keyboardi's keys. */
@@ -432,82 +554,6 @@ load_image (const char *file_image)
    gtk_image_set_from_pixbuf (gamew.image, tux_image); 
 }
 
-/* Quits the application from the menu. */
-static void
-quit_action (GtkAction *action,
-             gpointer data)
-{
-   main_win_destroy (NULL,NULL);
-}
-
-/* Shows an about dialog from the application. */
-static void
-about_action (GtkAction *action,
-              gpointer data){
-
-  GtkWidget *dialog;
-  GdkPixbuf *logo;
-  GError *error = NULL;
-
-  const gchar *authors[] = {
-    "Patricia Santana Cruz", 
-    NULL
-  };
-
-  const gchar *documenters[] = {
-    "Patricia Santana Cruz",
-    NULL
-  };
-  
-  const gchar *art_work[] = {
-     "Tux images in this game, are based on Wikimedia:\nhttp://commons.wikimedia.org/wiki/File:Tux-G2.png\nby Jan Vansteenkiste.",
-     NULL
-  };
-     
-  dialog = gtk_about_dialog_new ();
-  
-  /* XXX this is not the definitive image */
-  logo = gdk_pixbuf_new_from_file (TUX_IMG_0, &error);
-
-  /* Set the application logo or handle the error. */
-  if (error == NULL)
-    gtk_about_dialog_set_logo (GTK_ABOUT_DIALOG (dialog), logo);
-  else
-  {
-    if (error->domain == GDK_PIXBUF_ERROR)
-      g_print ("GdkPixbufError: %s\n", error->message);
-    else if (error->domain == G_FILE_ERROR)
-      g_print ("GFileError: %s\n", error->message);
-    else
-      g_print ("An error in the unexpected domain:%d has occurred!\n", error->domain);
-
-    g_error_free (error);
-  }
-
-  /* Set application data that will be displayed in the main dialog. */
-  gtk_about_dialog_set_program_name (GTK_ABOUT_DIALOG (dialog), "GHangTux");
-  gtk_about_dialog_set_version (GTK_ABOUT_DIALOG (dialog), "0.1");
-  gtk_about_dialog_set_copyright (GTK_ABOUT_DIALOG (dialog), 
-                                  "(C) 2010 Patricia Santana Cruz");
-  gtk_about_dialog_set_comments (GTK_ABOUT_DIALOG (dialog), 
-                                 "GHangTux is a variation of the popular Hangman game.");
-
-  /* XXX Need to load the file with the text here */
-  /* XXX Use #define for texts!! */
-  gtk_about_dialog_set_license (GTK_ABOUT_DIALOG (dialog), 
-                                "Free: (TODO: look for the right text).");
-  gtk_about_dialog_set_website (GTK_ABOUT_DIALOG (dialog), 
-                                "http://github.com/Patriciasc/GHangTux");
-  gtk_about_dialog_set_website_label (GTK_ABOUT_DIALOG (dialog), 
-                                      "http://github.com/Patriciasc/GHangTux");
-
-  gtk_about_dialog_set_authors (GTK_ABOUT_DIALOG (dialog), authors);
-  gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG (dialog), documenters);
-  gtk_about_dialog_set_translator_credits (GTK_ABOUT_DIALOG (dialog), 
-                                           TRANSLATOR);
-  gtk_about_dialog_set_artists (GTK_ABOUT_DIALOG (dialog), art_work); 
-
-
-  gtk_dialog_run (GTK_DIALOG (dialog));
-  gtk_widget_destroy (dialog);
-}
+/****************************
+ * END: Auxiliary functions *
+ * **************************/
