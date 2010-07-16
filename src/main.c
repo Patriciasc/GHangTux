@@ -522,6 +522,7 @@ get_system_file (const gchar *filename)
          pathname = NULL;
       }
    }
+
    return pathname;
 }
 

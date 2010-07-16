@@ -15,7 +15,12 @@
    |             Table of Contents             |
    |-------------------------------------------|
    |  * About                                  |
+   |    + What Is 'GHangtux?'                  |
+   |    + License                              |
+   |                                           |
    |  * Using GHangtux                         |
+   |    + How To Play 'GHangtux?'              | 
+   |    + Installation                         |
    +-------------------------------------------+
 
      ----------------------------------------------------------------------
@@ -63,5 +68,23 @@ How To Play 'GHangtux?'
           * All Tux images has been shown. 
 
 
-Loading 'GHangtux'
-                               -- COMING SOON --
+
+Installation:
+
+      For a custom prefix the $XDG_DATA_DIRS variable needs to be set up. This 
+      is an issue that I would like to change for the next versions.
+
+      * Usage example:
+      
+      desirable prefix for installation: /home/me/.local
+      
+      Installation process BEFORE:
+      [me@me GHangTux]$ ./autogen.sh --prefix=/home/me/.local
+      [me@me GHangTux]$ make
+      [me@me GHangTux]$ make install 
+
+      Installation process NOW:
+      [me@me GHangTux]$ ./autogen.sh --prefix=/home/me/.local
+      [me@me GHangTux]$ make
+      [me@me GHangTux]$ make install 
+      [me@me GHangTux]$ XDG_DATA_DIRS=/home/me/.local/share /home/me/.local/bin/ghangtux
