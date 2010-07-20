@@ -3,7 +3,9 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 
 AM_CPPFLAGS = $(DEP_CFLAGS)
 bin_PROGRAMS = ghangtux
-ghangtux_SOURCES = src/main.c 
+ghangtux_SOURCES = src/main.c \
+                   src/keyboard.h \
+                   src/keyboard.c 
 
 imagesdir = $(pkgdatadir)/images
 dist_images_DATA = data/images/Tux0.png \
@@ -13,7 +15,8 @@ dist_images_DATA = data/images/Tux0.png \
                    data/images/Tux4.png \
                    data/images/Tux5.png \
                    data/images/Tux6.png \
-                   data/images/Tux7.png 
+                   data/images/Tux7.png \
+                   data/images/Tux8.png
 
 uidir = $(pkgdatadir)/ui
 dist_ui_DATA = data/ui/ghangtux.glade \

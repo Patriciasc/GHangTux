@@ -32,6 +32,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "config.h"
+#include "keyboard.h"
 
 #define TUX_IMG_0 "images/Tux0.png"
 #define FILMS_FILE "themes/films.txt"
@@ -43,12 +44,13 @@
 
 #define ACTION_GROUP "MainActionGroup"
 #define SENTENCE_LABEL "for_sentence_label"
+#define TITLE_LABEL "for_title_label"
 #define WIN "main_win"
 #define VBOX "vbox"
+#define VBOX2 "vbox2"
 #define MENU "/MainMenu"
 #define IMAGE "hangtux_area"
 #define STATUSBAR "statusbar"
-#define KEYBOARD "keyboard_EN"
 
 #define MIN_RANDOM 1
 #define MAX_RANDOM 41
@@ -56,7 +58,8 @@
 
 /* Callbacks for signals. */
 void main_win_destroy (GtkObject *window, gpointer data);
-void format_sentence_with_letter (GtkButton *button, gpointer data);
+void format_sentence_with_letter (Keyboard *keyboard, const gchar key_name,
+                                  gpointer data);
 
 /* Callbacks for actions. */
 static void quit_action (GtkAction *action, gpointer data);
@@ -66,8 +69,8 @@ static void about_action (GtkAction *action, gpointer data);
 
 /* Auxiliary functions. */
 static void load_image (const char *file_image);
-static void set_keyboard_active (gboolean active);
 static gchar *get_system_file (const gchar *filename);
+static void set_end_game (gpointer data, gboolean winner);
 
 /* --------------------------------------------------------*/
 /* --------------  START: list of actions  ----------------*/
@@ -75,12 +78,12 @@ static gchar *get_system_file (const gchar *filename);
 
 static GtkRadioActionEntry radio_actions[] =
 {
-  { "FilmsThemesMenuAction", 
-    NULL, 
-    "_Films", 
-    "<Ctrl><Shift>f",
-    "Selects a random film", 
-    0},
+  { "FilmsThemesMenuAction",    /* action name  */ 
+    NULL,                       /* stock id     */
+    "_Films",                   /* label        */
+    "<Ctrl><Shift>f",           /* accelerator  */
+    "Selects a random film",    /* tooltip      */
+    0},                         /* action value */       
 
   { "ObjectsThemesMenuAction", 
     NULL, 
@@ -132,7 +135,6 @@ static GtkActionEntry actions[] =
     "Quit the application", 
     G_CALLBACK (quit_action) },
 
-  /* Help menu action. */   
   { "AboutHelpMenuAction", 
     GTK_STOCK_ABOUT, 
     "_About", 
@@ -148,32 +150,24 @@ static const guint NUM_ACTIONS = G_N_ELEMENTS (actions);
 /* --------------------------------------------------------*/
 
 typedef struct _GameWidget Gamewidget;
-typedef struct _Keyboard   Keyboard;
 
 /* Actual display sentence management. */
 struct _GameWidget
 {
    gchar *sentence;           /* games's sentence */
    gchar *display_sentence;   /* displayed sentence */
-   const gchar *valid_chars;  /* user asserted characters */
+   const gchar *valid_chars;  /* player asserted characters */
    GtkLabel *display_label;   /* label for display_sentence */
+   GtkLabel *title_label;     /* title label */
    GtkImage *image;           /* displayed image */
    gint n_img;                /* current image number */
    gboolean first_game;       /* indicates if the current game is the first */
+   GtkWidget *keyboard;       /* keyboard */
    GtkWidget *statusbar;      /* game status bar */
    gint scontext;             /* game status bar's context */
 };
 
-/* Keyboard management */
-struct _Keyboard
-{
-   GtkContainer *table;
-   GList *keys;
-   GList *index;
-};
-
 Gamewidget gamew;
-Keyboard keyboard;
 
 int
 main (int argc,
@@ -182,6 +176,7 @@ main (int argc,
    GtkBuilder *builder = NULL;
    GtkWidget *window = NULL;
    GtkWidget *vbox = NULL;
+   GtkWidget *vbox2 = NULL;
    GtkWidget *menubar = NULL;
    GtkActionGroup *def_group = NULL;
    GtkUIManager *uimanager = NULL;
@@ -192,15 +187,13 @@ main (int argc,
    gamew.display_sentence = NULL;
    gamew.valid_chars = NULL;
    gamew.display_label = NULL;
+   gamew.title_label = NULL;
    gamew.image = NULL;
    gamew.n_img = 0;
    gamew.first_game = 1;
+   gamew.keyboard = NULL;
    gamew.statusbar = NULL;
    gamew.scontext = 0;
-
-   keyboard.table = NULL;
-   keyboard.keys = NULL;
-   keyboard.index = NULL;
 
    gtk_init (&argc, &argv);
    
@@ -217,16 +210,15 @@ main (int argc,
    window = GTK_WIDGET (gtk_builder_get_object (builder,WIN));
    vbox = GTK_WIDGET (gtk_builder_get_object (builder, VBOX));
    gamew.display_label = GTK_LABEL (gtk_builder_get_object (builder, SENTENCE_LABEL));
+   gamew.title_label = GTK_LABEL (gtk_builder_get_object (builder, TITLE_LABEL));
    gamew.image = GTK_IMAGE (gtk_builder_get_object (builder, IMAGE));
    gamew.statusbar = GTK_WIDGET (gtk_builder_get_object (builder, STATUSBAR));
-   keyboard.table = GTK_CONTAINER (gtk_builder_get_object (builder, KEYBOARD));
-   keyboard.keys = gtk_container_get_children (keyboard.table);
-   keyboard.index = keyboard.keys;
+   vbox2 = GTK_WIDGET (gtk_builder_get_object (builder, VBOX2));
 
    gtk_builder_connect_signals (builder,NULL);
    g_object_unref (G_OBJECT(builder));
 
-   /* Setting up UI manager. */ 
+   /* Setting up the UI manager. */ 
    def_group = gtk_action_group_new (ACTION_GROUP);
    gtk_action_group_add_actions (def_group, actions, NUM_ACTIONS, NULL);
    gtk_action_group_add_radio_actions (def_group, radio_actions, NUM_RACTIONS,
@@ -245,14 +237,19 @@ main (int argc,
    menubar = gtk_ui_manager_get_widget (uimanager, MENU);
    gtk_window_add_accel_group (GTK_WINDOW (window), 
                                gtk_ui_manager_get_accel_group (uimanager));
-
    gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, FALSE, 1);
    gtk_box_reorder_child (GTK_BOX (vbox), menubar, 0);
 
+   /* Setting up the keyboard. */
+   gamew.keyboard = keyboard_new();
+   g_signal_connect (gamew.keyboard, "key_clicked",
+                     G_CALLBACK (format_sentence_with_letter), NULL);
+   gtk_box_pack_start (GTK_BOX (vbox2), gamew.keyboard, FALSE, FALSE, 0);
+   gtk_box_reorder_child (GTK_BOX (vbox2), gamew.keyboard, 3);
+
    gtk_widget_show_all (window);
-   
-   /* Prepares game. */
-   /* get_sentence_action(NULL,0,NULL); */
+  
+   /* Preparing game. */
    raction_init = gtk_radio_action_new ("init", "init", "init", "init", 0);
    get_sentence_action(NULL,raction_init,NULL); 
    load_image(get_system_file(TUX_IMG_0));
@@ -274,26 +271,17 @@ main_win_destroy (GtkObject *window,
    gtk_main_quit();
 }
 
-/* Formats the sentence with a new letter for displaying. */
+/* Formats the sentence with a new letter for displaying.*/ 
 void
-format_sentence_with_letter (GtkButton *button, gpointer data)
+format_sentence_with_letter (Keyboard *keyboard, const gchar key_name, gpointer data)
 {
-   const gchar *label = NULL;
    gint i = 0;
    gint valid_letter = 0;
-   gchar *letter = NULL;
-   gchar *markup = NULL;
 	
-   /* Make button unsensitive. */
-   gtk_widget_set_sensitive(GTK_WIDGET(button),FALSE);
-
-   label = gtk_button_get_label (GTK_BUTTON (button)); 
-   letter = g_strdup (label);
-
    /* Looks for the label's letter in the sentence. */
    for (i=0; i!=strlen(gamew.sentence); i++)
    { 
-      if (gamew.sentence[i] == letter[1])
+      if (gamew.sentence[i] == key_name)
       {
           valid_letter = 1;
       }
@@ -302,34 +290,29 @@ format_sentence_with_letter (GtkButton *button, gpointer data)
    /* Add the letter as a valid character and displays it. */
    if (valid_letter == 1)
    {
-      gamew.valid_chars = g_strconcat (gamew.valid_chars, letter, NULL);
+      gamew.valid_chars = g_strconcat (gamew.valid_chars, &key_name, NULL);
       gamew.display_sentence = g_strdup (gamew.sentence);
       g_strcanon ( gamew.display_sentence, gamew.valid_chars, '_');
       gtk_label_set_text (gamew.display_label, gamew.display_sentence);
+      
+      /* Player wins. */
+      if (g_strcmp0(gamew.sentence, gamew.display_sentence) == 0)
+      {
+         set_end_game(data, TRUE);
+      }
    }
-   /* Loads a new image of the Hangtux. */
    else
    { 
-      if (gamew.n_img < NUM_IMAGES)
+      /* Loads a new image of the Hangtux. */ 
+      if (gamew.n_img < NUM_IMAGES) 
       {
          load_image (get_system_file(g_strdup_printf("images/Tux%i.png",gamew.n_img)));
          gamew.n_img++;
       }
+      /* Player loses. */
       else
       {
-         load_image (get_system_file("images/Tux7.png"));
-         gtk_label_set_text (gamew.display_label, " ");
-
-         /* Change status bar state. */
-         gamew.scontext = gtk_statusbar_get_context_id (GTK_STATUSBAR (gamew.statusbar),
-                                                        "Statusbar");
-         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), 
-                             GPOINTER_TO_INT (data), "End of game. Try again!");
-
-         /* Desable the use of the keys. */
-         set_keyboard_active (FALSE);
-         gamew.first_game = 0;
-         g_free (markup);
+         set_end_game(data,FALSE);
       }
    }
 }
@@ -366,29 +349,33 @@ get_sentence_action (GtkRadioAction *raction,
    /* Not first game => Reset values and prepares new game. */
    if (!gamew.first_game)
    {
+      keyboard_set_sensitive (KEYBOARD (gamew.keyboard), TRUE);
       gamew.valid_chars = NULL;
       load_image(get_system_file (TUX_IMG_0));
       gamew.n_img = 1;
-      set_keyboard_active (TRUE);
    }
 
    /* Status bar context. */
    gamew.scontext = gtk_statusbar_get_context_id (
                     GTK_STATUSBAR (gamew.statusbar),"Statusbar");
+
    /* Select the file. */
    switch (gtk_radio_action_get_current_value (curr_raction))
    {
       case 0:
+         gtk_label_set_text (gamew.title_label, "Guess the film by typing letters");
          file = g_file_new_for_path (get_system_file(FILMS_FILE));
          gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Films");
          break;
 
       case 1:
+         gtk_label_set_text (gamew.title_label, "Guess the object by typing letters");
          file = g_file_new_for_path (get_system_file (OBJECTS_FILE));
          gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Objects");
          break;
 
       case 2:
+         gtk_label_set_text (gamew.title_label, "Guess the person by typing letters");
          file = g_file_new_for_path (get_system_file(PERSONS_FILE));
          gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Persons");
          break;
@@ -474,7 +461,6 @@ about_action (GtkAction *action,
                                  "GHangTux is a variation of the popular Hangman game.");
 
   /* XXX Need to load the file with the text here */
-  /* XXX Use #define for texts!! */
   gtk_about_dialog_set_license (GTK_ABOUT_DIALOG (dialog), 
                                 "Free: (TODO: look for the right text).");
   gtk_about_dialog_set_website (GTK_ABOUT_DIALOG (dialog), 
@@ -501,7 +487,7 @@ about_action (GtkAction *action,
  * START: Auxiliary functions *
  * ****************************/
 
-/* Gets user's system files. */
+/* Gets player's system files. */
 static gchar *
 get_system_file (const gchar *filename)
 {
@@ -526,18 +512,6 @@ get_system_file (const gchar *filename)
    return pathname;
 }
 
-/* Enables or desables keyboardi's keys. */
-static void
-set_keyboard_active (gboolean active)
-{
-   while (keyboard.index != NULL)
-   {
-      gtk_widget_set_sensitive (GTK_WIDGET (keyboard.index->data), active);
-      keyboard.index = keyboard.index->next;
-   }
-   keyboard.index = keyboard.keys;
-}
-
 /* Loads an image for the GtkImage central area. */
 static void
 load_image (const char *file_image)
@@ -560,6 +534,36 @@ load_image (const char *file_image)
    }
    
    gtk_image_set_from_pixbuf (gamew.image, tux_image); 
+}
+
+/* Sets up the end of the game. */
+static void
+set_end_game (gpointer data, gboolean winner)
+{
+   gtk_label_set_text (gamew.display_label, " ");
+       
+   /* Change status bar state. */
+   gamew.scontext = gtk_statusbar_get_context_id (GTK_STATUSBAR (gamew.statusbar),
+                                                  "Statusbar");
+   if (!winner)
+   {
+      load_image (get_system_file("images/Tux7.png"));
+      gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), 
+                          GPOINTER_TO_INT (data), "End of game. Try again!");
+   }
+   else
+   {
+      load_image (get_system_file("images/Tux8.png"));
+      gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), 
+                          GPOINTER_TO_INT (data), "Congratulations!");
+   }
+   
+   /* Set title label */
+   gtk_label_set_text (gamew.title_label, " "); 
+
+   /* Desable the use of the keys. */
+   keyboard_set_sensitive (KEYBOARD (gamew.keyboard), FALSE);
+   gamew.first_game = 0;
 }
 
 /****************************
