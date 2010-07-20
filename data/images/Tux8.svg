@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="svg3449"
+   version="1.1"
+   inkscape:version="0.47 r22583"
+   width="381"
+   height="423"
+   sodipodi:docname="Tux8.svg"
+   inkscape:export-filename="/home/patriciasc/GHangTux_keyboard/data/images/Tux8.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <metadata
+     id="metadata3455">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs3453">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       id="perspective3457" />
+  </defs>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1668"
+     inkscape:window-height="968"
+     id="namedview3451"
+     showgrid="false"
+     inkscape:snap-nodes="true"
+     inkscape:snap-bbox="true"
+     inkscape:zoom="0.55791962"
+     inkscape:cx="190.5"
+     inkscape:cy="211.5"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg3449" />
+  <image
+     xlink:href="file:///home/patriciasc/GHangTux_keyboard/data/images/Tux6.png"
+     width="381"
+     height="423"
+     id="image3459"
+     x="0"
+     y="0" />
+  <rect
+     style="fill:#aad400;fill-opacity:1"
+     id="rect3463"
+     width="353.09747"
+     height="204.33051"
+     x="12.54661"
+     y="207.91525"
+     ry="79.738739" />
+  <flowRoot
+     xml:space="preserve"
+     id="flowRoot3467"
+     style="font-size:40px;font-style:normal;font-weight:normal;fill:#28170b;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"><flowRegion
+       id="flowRegion3469"><rect
+         id="rect3471"
+         width="295.74152"
+         height="44.809322"
+         x="41.224575"
+         y="222.25424"
+         style="fill:#28170b" /></flowRegion><flowPara
+       id="flowPara3473">CCon</flowPara></flowRoot>  <text
+     xml:space="preserve"
+     style="font-size:38.31480789px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+     x="23.286919"
+     y="272.42029"
+     id="text3475"
+     transform="scale(1.0048715,0.9951521)"><tspan
+       sodipodi:role="line"
+       id="tspan3477"
+       x="23.286919"
+       y="272.42029"
+       style="text-align:start;text-anchor:start;font-family:KacstDigital;-inkscape-font-specification:KacstDigital"><tspan
+   style="fill:#002255"
+   id="tspan3483">Congratulations</tspan>!!</tspan></text>
+  <flowRoot
+     xml:space="preserve"
+     id="flowRoot3491"
+     style="fill:black;stroke:none;stroke-opacity:1;stroke-width:1px;stroke-linejoin:miter;stroke-linecap:butt;fill-opacity:1;font-family:Bitstream Vera Sans;font-style:normal;font-weight:normal;font-size:40px"><flowRegion
+       id="flowRegion3493"><rect
+         id="rect3495"
+         width="302.91101"
+         height="87.826271"
+         x="34.055084"
+         y="286.77966" /></flowRegion><flowPara
+       id="flowPara3497"></flowPara></flowRoot>  <text
+     xml:space="preserve"
+     style="font-size:30.70569038px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+     x="215.0309"
+     y="282.5632"
+     id="text3499"
+     transform="scale(0.90369755,1.1065649)"><tspan
+       sodipodi:role="line"
+       id="tspan3501"
+       x="215.0309"
+       y="282.5632"
+       style="text-align:center;text-anchor:middle;fill:#00112b">Choose a new</tspan><tspan
+       sodipodi:role="line"
+       x="215.0309"
+       y="320.94531"
+       id="tspan3503"
+       style="text-align:center;text-anchor:middle;fill:#00112b">theme from the</tspan><tspan
+       sodipodi:role="line"
+       x="215.0309"
+       y="359.32742"
+       id="tspan3505"
+       style="text-align:center;text-anchor:middle;fill:#00112b">Game's menu.</tspan></text>
+</svg>
