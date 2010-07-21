@@ -49,6 +49,7 @@
 #define VBOX "vbox"
 #define VBOX2 "vbox2"
 #define MENU "/MainMenu"
+#define TOOLBAR "/MainToolbar"
 #define IMAGE "hangtux_area"
 #define STATUSBAR "statusbar"
 
@@ -178,8 +179,9 @@ main (int argc,
    GtkWidget *vbox = NULL;
    GtkWidget *vbox2 = NULL;
    GtkWidget *menubar = NULL;
+   /*GtkWidget *toolbar = NULL;*/
    GtkActionGroup *def_group = NULL;
-   GtkUIManager *uimanager = NULL;
+   GtkUIManager *ui_manager = NULL;
    GtkRadioAction *raction_init = NULL;
    GError *error = NULL;
 
@@ -218,28 +220,35 @@ main (int argc,
    gtk_builder_connect_signals (builder,NULL);
    g_object_unref (G_OBJECT(builder));
 
-   /* Setting up the UI manager. */ 
+   /* Setting up the UI manager (menu and toolbar). */ 
    def_group = gtk_action_group_new (ACTION_GROUP);
    gtk_action_group_add_actions (def_group, actions, NUM_ACTIONS, NULL);
    gtk_action_group_add_radio_actions (def_group, radio_actions, NUM_RACTIONS,
                                        0, G_CALLBACK (get_sentence_action),  NULL);
  
-   uimanager = gtk_ui_manager_new ();
-   gtk_ui_manager_insert_action_group (uimanager, def_group, 0);
+   ui_manager = gtk_ui_manager_new ();
+   gtk_ui_manager_insert_action_group (ui_manager, def_group, 0);
    
-   if (!gtk_ui_manager_add_ui_from_file (uimanager, get_system_file (UI_FILE), &error))
+   if (!gtk_ui_manager_add_ui_from_file (ui_manager, get_system_file (UI_FILE), &error))
    {
       g_message ("Building menus failed: %s\n", error->message);
       g_error_free (error);
       return 1;
    }
   
-   menubar = gtk_ui_manager_get_widget (uimanager, MENU);
    gtk_window_add_accel_group (GTK_WINDOW (window), 
-                               gtk_ui_manager_get_accel_group (uimanager));
-   gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, FALSE, 1);
-   gtk_box_reorder_child (GTK_BOX (vbox), menubar, 0);
+                               gtk_ui_manager_get_accel_group (ui_manager));
 
+   menubar = gtk_ui_manager_get_widget (ui_manager, MENU);
+   gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, FALSE, 0);
+   gtk_box_reorder_child (GTK_BOX (vbox), menubar, 0);
+   
+   /*
+   toolbar = gtk_ui_manager_get_widget (ui_manager, "/MainToolbar");
+   gtk_toolbar_set_style (GTK_TOOLBAR (toolbar), GTK_TOOLBAR_BOTH);
+   gtk_box_pack_start (GTK_BOX (vbox), toolbar, FALSE, FALSE, 0);
+   gtk_box_reorder_child (GTK_BOX (vbox), toolbar, 1);*/
+   
    /* Setting up the keyboard. */
    gamew.keyboard = keyboard_new();
    g_signal_connect (gamew.keyboard, "key_clicked",
