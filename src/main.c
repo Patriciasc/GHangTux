@@ -213,6 +213,7 @@ main (int argc,
    GtkUIManager *ui_manager = NULL;
    GtkRadioAction *raction_init = NULL;
    GError *error = NULL;
+   GdkColor image_bg;
 
    gamew.sentence = NULL;
    gamew.display_sentence = NULL;
@@ -225,6 +226,9 @@ main (int argc,
    gamew.keyboard = NULL;
    gamew.statusbar = NULL;
    gamew.scontext = 0;
+   image_bg.red = 0xffff;
+   image_bg.green = 0x0000;
+   image_bg.blue = 0x0f00;
 
    gtk_init (&argc, &argv);
    
@@ -245,6 +249,9 @@ main (int argc,
    gamew.image = GTK_IMAGE (gtk_builder_get_object (builder, IMAGE));
    gamew.statusbar = GTK_WIDGET (gtk_builder_get_object (builder, STATUSBAR));
    vbox2 = GTK_WIDGET (gtk_builder_get_object (builder, VBOX2));
+
+   /* XXX Does not work. Maybe inside an event box? */
+   gtk_widget_modify_bg (GTK_WIDGET (gamew.image), 0, &image_bg);
 
    gtk_builder_connect_signals (builder,NULL);
    g_object_unref (G_OBJECT(builder));
