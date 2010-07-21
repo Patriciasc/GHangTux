@@ -63,6 +63,8 @@ void format_sentence_with_letter (Keyboard *keyboard, const gchar key_name,
                                   gpointer data);
 
 /* Callbacks for actions. */
+static void new_action (GtkAction *action, gpointer data);
+static void solve_action (GtkAction *action, gpointer data);
 static void quit_action (GtkAction *action, gpointer data);
 static void get_sentence_action (GtkRadioAction *raction,
                                  GtkRadioAction *curr_raction, gpointer data);
@@ -71,7 +73,7 @@ static void about_action (GtkAction *action, gpointer data);
 /* Auxiliary functions. */
 static void load_image (const char *file_image);
 static gchar *get_system_file (const gchar *filename);
-static void set_end_game (gpointer data, gboolean winner);
+static void set_end_game (gpointer data, int winner);
 
 /* --------------------------------------------------------*/
 /* --------------  START: list of actions  ----------------*/
@@ -112,10 +114,10 @@ static GtkActionEntry actions[] =
     NULL,                        /* tooltip           */
     NULL                         /* action (callback) */
   },
-
-  { "HelpMenuAction", 
-    NULL, 
-    "_Help",
+  
+  { "SettingsMenuAction",
+    NULL,
+    "_Settings",
     NULL,
     NULL,
     NULL
@@ -129,12 +131,37 @@ static GtkActionEntry actions[] =
     NULL
   },
 
+  { "HelpMenuAction", 
+    NULL, 
+    "_Help",
+    NULL,
+    NULL,
+    NULL
+  },
+
+  { "NewMenuAction",
+    GTK_STOCK_NEW,
+    "_New",
+    "<Ctrl><Shift>n",
+    "Prepares a new game for the actual theme",
+    G_CALLBACK (new_action)
+  },
+ 
+  { "SolveMenuAction",
+    GTK_STOCK_APPLY,
+    "_Solve",
+    "<Ctrl><Shift>s",
+    "Displays the solution for the actual game",
+    G_CALLBACK (solve_action)
+  },
+
   { "QuitMenuAction", 
     GTK_STOCK_QUIT, 
     "_Quit", 
     "<Ctrl><Shift>q",
     "Quit the application", 
-    G_CALLBACK (quit_action) },
+    G_CALLBACK (quit_action)
+  },
 
   { "AboutHelpMenuAction", 
     GTK_STOCK_ABOUT, 
@@ -166,6 +193,7 @@ struct _GameWidget
    GtkWidget *keyboard;       /* keyboard */
    GtkWidget *statusbar;      /* game status bar */
    gint scontext;             /* game status bar's context */
+   gint theme_id;             /* current theme's identifier */
 };
 
 Gamewidget gamew;
@@ -179,7 +207,7 @@ main (int argc,
    GtkWidget *vbox = NULL;
    GtkWidget *vbox2 = NULL;
    GtkWidget *menubar = NULL;
-   /*GtkWidget *toolbar = NULL;*/
+   GtkWidget *toolbar = NULL;
    GtkActionGroup *def_group = NULL;
    GtkUIManager *ui_manager = NULL;
    GtkRadioAction *raction_init = NULL;
@@ -243,11 +271,10 @@ main (int argc,
    gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, FALSE, 0);
    gtk_box_reorder_child (GTK_BOX (vbox), menubar, 0);
    
-   /*
    toolbar = gtk_ui_manager_get_widget (ui_manager, "/MainToolbar");
-   gtk_toolbar_set_style (GTK_TOOLBAR (toolbar), GTK_TOOLBAR_BOTH);
+   gtk_toolbar_set_style (GTK_TOOLBAR (toolbar), GTK_TOOLBAR_ICONS);
    gtk_box_pack_start (GTK_BOX (vbox), toolbar, FALSE, FALSE, 0);
-   gtk_box_reorder_child (GTK_BOX (vbox), toolbar, 1);*/
+   gtk_box_reorder_child (GTK_BOX (vbox), toolbar, 1);
    
    /* Setting up the keyboard. */
    gamew.keyboard = keyboard_new();
@@ -334,6 +361,43 @@ format_sentence_with_letter (Keyboard *keyboard, const gchar key_name, gpointer 
  * START: Callbacks for actions *
  * ******************************/
 
+/* Loads a game for the same current theme. */
+static void
+new_action (GtkAction *action,
+            gpointer data)
+{
+   GtkRadioAction *raction_init = NULL;
+
+   switch (gamew.theme_id)
+   {
+      case 0:
+         raction_init = gtk_radio_action_new ("init", "init", "init", "init", 0);
+         get_sentence_action(NULL,raction_init,NULL); 
+         break;
+
+      case 1:
+         raction_init = gtk_radio_action_new ("init", "init", "init", "init", 1);
+         get_sentence_action(NULL,raction_init,NULL); 
+         break;
+
+      case 2:
+         raction_init = gtk_radio_action_new ("init", "init", "init", "init", 2);
+         get_sentence_action(NULL,raction_init,NULL); 
+         break;
+
+      default:
+         g_print (" Problem loading new game for same theme\n");
+   }
+}
+
+/* Displays the solution for the current game. */
+static void
+solve_action (GtkAction *action,
+              gpointer data)
+{
+   set_end_game (data, -1);
+}
+
 /* Quits the application from the menu. */
 static void
 quit_action (GtkAction *action,
@@ -372,19 +436,22 @@ get_sentence_action (GtkRadioAction *raction,
    switch (gtk_radio_action_get_current_value (curr_raction))
    {
       case 0:
-         gtk_label_set_text (gamew.title_label, "Guess the film by typing letters");
+         gamew.theme_id = 0;
+         gtk_label_set_text (gamew.title_label, "Guess the FILM by typing letters");
          file = g_file_new_for_path (get_system_file(FILMS_FILE));
          gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Films");
          break;
 
       case 1:
-         gtk_label_set_text (gamew.title_label, "Guess the object by typing letters");
+         gamew.theme_id = 1;
+         gtk_label_set_text (gamew.title_label, "Guess the OBJECT by typing letters");
          file = g_file_new_for_path (get_system_file (OBJECTS_FILE));
          gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Objects");
          break;
 
       case 2:
-         gtk_label_set_text (gamew.title_label, "Guess the person by typing letters");
+         gamew.theme_id = 2;
+         gtk_label_set_text (gamew.title_label, "Guess the PERSON by typing letters");
          file = g_file_new_for_path (get_system_file(PERSONS_FILE));
          gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Persons");
          break;
@@ -547,26 +614,32 @@ load_image (const char *file_image)
 
 /* Sets up the end of the game. */
 static void
-set_end_game (gpointer data, gboolean winner)
+set_end_game (gpointer data, int winner)
 {
-   gtk_label_set_text (gamew.display_label, " ");
+   gtk_label_set_text (GTK_LABEL (gamew.display_label), gamew.sentence);
        
    /* Change status bar state. */
    gamew.scontext = gtk_statusbar_get_context_id (GTK_STATUSBAR (gamew.statusbar),
                                                   "Statusbar");
-   if (!winner)
+   if (winner == 0)
    {
       load_image (get_system_file("images/Tux7.png"));
       gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), 
                           GPOINTER_TO_INT (data), "End of game. Try again!");
    }
-   else
+   else if (winner == 1)
    {
       load_image (get_system_file("images/Tux8.png"));
       gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), 
                           GPOINTER_TO_INT (data), "Congratulations!");
    }
-   
+   else
+   {
+      load_image (get_system_file("images/Tux7.png"));
+      gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), 
+                          GPOINTER_TO_INT (data), "Solution");
+   }
+      
    /* Set title label */
    gtk_label_set_text (gamew.title_label, " "); 
 

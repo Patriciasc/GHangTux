@@ -1,13 +1,17 @@
 <ui>
    <menubar name="MainMenu">
      <menu name="GameMenu" action="GameMenuAction">
+       <menuitem name="NewMenu" action="NewMenuAction"/>
+       <menuitem name="SolveMenu" action="SolveMenuAction"/>
+       <separator/>
+       <menuitem name="QuitMenu" action="QuitMenuAction"/>
+     </menu>
+     <menu name="SettingsMenu" action="SettingsMenuAction">
        <menu name="ThemesMenu" action="ThemesMenuAction">
          <menuitem name="FilmsThemesMenu" action="FilmsThemesMenuAction"/>
          <menuitem name="ObjectsThemesMenu" action="ObjectsThemesMenuAction"/>
          <menuitem name="PersonsThemesMenu" action="PersonsThemesMenuAction"/>
        </menu>
-       <separator/>
-       <menuitem name="QuitMenu" action="QuitMenuAction"/>
      </menu>
      <menu name="HelpMenu" action="HelpMenuAction">
        <menuitem name="AboutHelpMenu" action="AboutHelpMenuAction"/>
@@ -17,7 +21,8 @@
    <toolbar name="MainToolbar" action="MainMenuBarAction">
      <placeholder name="ToolItems">
        <separator/>
-       <toolitem name="New" action="ThemesMenuAction"/>
+       <toolitem name="New" action="NewMenuAction"/>
+       <toolitem name="Solution" action="SolveMenuAction"/>
        <separator/>
      </placeholder>
    </toolbar>
