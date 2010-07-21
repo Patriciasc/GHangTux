@@ -58,22 +58,23 @@
 #define NUM_IMAGES 7
 
 /* Callbacks for signals. */
-void main_win_destroy (GtkObject *window, gpointer data);
+void main_win_destroy            (GtkObject *window, gpointer data);
 void format_sentence_with_letter (Keyboard *keyboard, const gchar key_name,
                                   gpointer data);
 
 /* Callbacks for actions. */
-static void new_action (GtkAction *action, gpointer data);
-static void solve_action (GtkAction *action, gpointer data);
-static void quit_action (GtkAction *action, gpointer data);
+static void new_action          (GtkAction *action, gpointer data);
+static void solve_action        (GtkAction *action, gpointer data);
+static void quit_action         (GtkAction *action, gpointer data);
 static void get_sentence_action (GtkRadioAction *raction,
                                  GtkRadioAction *curr_raction, gpointer data);
-static void about_action (GtkAction *action, gpointer data);
+static void about_action        (GtkAction *action, gpointer data);
 
 /* Auxiliary functions. */
-static void load_image (const char *file_image);
-static gchar *get_system_file (const gchar *filename);
-static void set_end_game (gpointer data, int winner);
+static void  load_image               (const char *file_image);
+static gchar *get_system_file         (const gchar *filename);
+static void  set_end_game             (gpointer data, int winner);
+const gchar  *format_text_with_markup (const gchar *text, int type);
 
 /* --------------------------------------------------------*/
 /* --------------  START: list of actions  ----------------*/
@@ -313,7 +314,8 @@ format_sentence_with_letter (Keyboard *keyboard, const gchar key_name, gpointer 
 {
    gint i = 0;
    gint valid_letter = 0;
-	
+	const gchar *markup = NULL;
+
    /* Looks for the label's letter in the sentence. */
    for (i=0; i!=strlen(gamew.sentence); i++)
    { 
@@ -329,7 +331,8 @@ format_sentence_with_letter (Keyboard *keyboard, const gchar key_name, gpointer 
       gamew.valid_chars = g_strconcat (gamew.valid_chars, &key_name, NULL);
       gamew.display_sentence = g_strdup (gamew.sentence);
       g_strcanon ( gamew.display_sentence, gamew.valid_chars, '_');
-      gtk_label_set_text (gamew.display_label, gamew.display_sentence);
+      markup = format_text_with_markup (gamew.display_sentence, 0); 
+      gtk_label_set_markup (GTK_LABEL (gamew.display_label), markup);
       
       /* Player wins. */
       if (g_strcmp0(gamew.sentence, gamew.display_sentence) == 0)
@@ -416,6 +419,7 @@ get_sentence_action (GtkRadioAction *raction,
    GError *error = NULL;
    GFileInputStream *fstream = NULL; 
    GDataInputStream *stream = NULL;
+   const gchar *markup = NULL;
    gsize length = 0;
    gint random = 0;
 
@@ -437,21 +441,21 @@ get_sentence_action (GtkRadioAction *raction,
    {
       case 0:
          gamew.theme_id = 0;
-         gtk_label_set_text (gamew.title_label, "Guess the FILM by typing letters");
+         markup = format_text_with_markup ("Guess the FILM by typing letters", 1); 
          file = g_file_new_for_path (get_system_file(FILMS_FILE));
          gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Films");
          break;
 
       case 1:
          gamew.theme_id = 1;
-         gtk_label_set_text (gamew.title_label, "Guess the OBJECT by typing letters");
+         markup = format_text_with_markup ("Guess the OBJECT by typing letters", 1); 
          file = g_file_new_for_path (get_system_file (OBJECTS_FILE));
          gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Objects");
          break;
 
       case 2:
          gamew.theme_id = 2;
-         gtk_label_set_text (gamew.title_label, "Guess the PERSON by typing letters");
+         markup = format_text_with_markup ("Guess the PERSON by typing letters", 1); 
          file = g_file_new_for_path (get_system_file(PERSONS_FILE));
          gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Persons");
          break;
@@ -460,6 +464,9 @@ get_sentence_action (GtkRadioAction *raction,
          g_print ("Creating GFIle failed\n");
    }
    
+   /* Sets label with markup. */ 
+   gtk_label_set_markup (GTK_LABEL (gamew.title_label), markup);
+
    if (!(fstream = g_file_read (file, NULL, &error)))
    {
       g_message ("Creating file stream error: %s", error->message);
@@ -481,7 +488,10 @@ get_sentence_action (GtkRadioAction *raction,
    gamew.display_sentence = g_strdup (gamew.sentence);
    gamew.valid_chars = " ";
    g_strcanon ( gamew.display_sentence, gamew.valid_chars, '_');
-   gtk_label_set_text (gamew.display_label, gamew.display_sentence);
+   markup = format_text_with_markup (gamew.display_sentence, 0); 
+   gtk_label_set_markup (GTK_LABEL (gamew.display_label), markup);
+   
+   g_free (markup);
 }
 
 /* Shows an about dialog from the application. */
@@ -616,7 +626,12 @@ load_image (const char *file_image)
 static void
 set_end_game (gpointer data, int winner)
 {
-   gtk_label_set_text (GTK_LABEL (gamew.display_label), gamew.sentence);
+   const gchar *markup = NULL;
+   
+   /* Shows solution. */
+   markup = format_text_with_markup (gamew.sentence, 0); 
+   gtk_label_set_markup (GTK_LABEL (gamew.display_label), markup);
+   g_free (markup);
        
    /* Change status bar state. */
    gamew.scontext = gtk_statusbar_get_context_id (GTK_STATUSBAR (gamew.statusbar),
@@ -646,6 +661,23 @@ set_end_game (gpointer data, int winner)
    /* Desable the use of the keys. */
    keyboard_set_sensitive (KEYBOARD (gamew.keyboard), FALSE);
    gamew.first_game = 0;
+}
+
+/* Formats the text with a markup before displaying it. */ 
+const gchar *
+format_text_with_markup (const gchar *text, int type)
+{
+   switch (type)
+   {
+      case 0:    /* Display label */
+         g_strdup (g_strdup_printf("<span size=\"large\" font_weight=\"ultrabold\">%s</span>", text));
+         break;
+      case 1:    /* Title label */
+         g_strdup (g_strdup_printf("<span size=\"small\">%s</span>", text));
+         break;
+      default:
+         g_print ("Problem setting markups\n");
+   }
 }
 
 /****************************
