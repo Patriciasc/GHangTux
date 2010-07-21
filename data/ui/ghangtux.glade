@@ -43,9 +43,14 @@
               </packing>
             </child>
             <child>
-              <object class="GtkImage" id="hangtux_area">
+              <object class="GtkEventBox" id="eventbox">
                 <property name="visible">True</property>
-                <property name="stock">gtk-dialog-warning</property>
+                <child>
+                  <object class="GtkImage" id="hangtux_area">
+                    <property name="visible">True</property>
+                    <property name="stock">gtk-dialog-warning</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="fill">False</property>

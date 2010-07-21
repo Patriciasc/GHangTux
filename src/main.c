@@ -52,6 +52,7 @@
 #define TOOLBAR "/MainToolbar"
 #define IMAGE "hangtux_area"
 #define STATUSBAR "statusbar"
+#define EVENTBOX "eventbox"
 
 #define MIN_RANDOM 1
 #define MAX_RANDOM 41
@@ -209,6 +210,7 @@ main (int argc,
    GtkWidget *vbox2 = NULL;
    GtkWidget *menubar = NULL;
    GtkWidget *toolbar = NULL;
+   GtkWidget *eventbox = NULL;
    GtkActionGroup *def_group = NULL;
    GtkUIManager *ui_manager = NULL;
    GtkRadioAction *raction_init = NULL;
@@ -249,9 +251,10 @@ main (int argc,
    gamew.image = GTK_IMAGE (gtk_builder_get_object (builder, IMAGE));
    gamew.statusbar = GTK_WIDGET (gtk_builder_get_object (builder, STATUSBAR));
    vbox2 = GTK_WIDGET (gtk_builder_get_object (builder, VBOX2));
+   eventbox = GTK_WIDGET (gtk_builder_get_object (builder, EVENTBOX));
 
    /* XXX Does not work. Maybe inside an event box? */
-   gtk_widget_modify_bg (GTK_WIDGET (gamew.image), 0, &image_bg);
+   gtk_widget_modify_bg (eventbox, 0, &image_bg);
 
    gtk_builder_connect_signals (builder,NULL);
    g_object_unref (G_OBJECT(builder));
