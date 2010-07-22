@@ -6,7 +6,7 @@
  * #                                                                      #
  * # Copyright (C) 2010 Openismus GmbH                                    #
  * #                                                                      #
- * # Version: 0.1                                                         #  
+ * # Version: 1.0                                                         #  
  * #                                                                      #
  * # Description: A variation of the Hangman game.                        #
  * #                                                                      #
@@ -554,7 +554,7 @@ about_action (GtkAction *action,
 
   /* Set application data that will be displayed in the main dialog. */
   gtk_about_dialog_set_program_name (GTK_ABOUT_DIALOG (dialog), "GHangTux");
-  gtk_about_dialog_set_version (GTK_ABOUT_DIALOG (dialog), "0.1");
+  gtk_about_dialog_set_version (GTK_ABOUT_DIALOG (dialog), "1.0");
   gtk_about_dialog_set_copyright (GTK_ABOUT_DIALOG (dialog), 
                                   " Copyright (C) 2010 Openismus GmbH");
   gtk_about_dialog_set_comments (GTK_ABOUT_DIALOG (dialog), 
