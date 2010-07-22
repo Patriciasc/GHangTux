@@ -38,6 +38,7 @@
 #define FILMS_FILE "themes/films.txt"
 #define OBJECTS_FILE "themes/objects.txt"
 #define PERSONS_FILE "themes/persons.txt"
+#define LOGO "icons/tux_icon.png"
 
 #define GUI_FILE "ui/ghangtux.glade"
 #define UI_FILE "ui/menu.ui"
@@ -534,7 +535,7 @@ about_action (GtkAction *action,
   dialog = gtk_about_dialog_new ();
   
   /* XXX this is not the definitive image */
-  logo = gdk_pixbuf_new_from_file (get_system_file (TUX_IMG_0), &error);
+  logo = gdk_pixbuf_new_from_file (get_system_file (LOGO), &error);
 
   /* Set the application logo or handle the error. */
   if (error == NULL)

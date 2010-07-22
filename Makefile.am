@@ -23,8 +23,8 @@ dist_ui_DATA = data/ui/ghangtux.glade \
                data/ui/menu.ui
 
 # iconsdir -- coming soon --
-# iconsdir = $(pkgdatadir)/icons
-# dist_icon16_DATA = data/icons/?
+iconsdir = $(pkgdatadir)/icons
+dist_icons_DATA = data/icons/tux_icon.png
 # dist_icon22_DATA = data/icons/?
 
 themesdir = $(pkgdatadir)/themes
