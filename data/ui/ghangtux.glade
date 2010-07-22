@@ -37,8 +37,7 @@
                 <property name="label" translatable="yes">Choose a theme from the Game's menu</property>
               </object>
               <packing>
-                <property name="expand">False</property>
-                <property name="padding">10</property>
+                <property name="padding">4</property>
                 <property name="position">1</property>
               </packing>
             </child>
