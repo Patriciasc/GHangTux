@@ -364,6 +364,7 @@ format_sentence_with_letter (Keyboard *keyboard, const gchar key_name, gpointer 
          set_end_game(data,FALSE);
       }
    }
+   g_free (markup);
 }
 
 /******************************
@@ -501,6 +502,8 @@ get_sentence_action (GtkRadioAction *raction,
    markup = format_text_with_markup (gamew.display_sentence, 0); 
    gtk_label_set_markup (GTK_LABEL (gamew.display_label), markup);
    
+   g_object_unref (file);
+   g_object_unref (fstream);
    g_free (markup);
 }
 
@@ -570,6 +573,7 @@ about_action (GtkAction *action,
                                            "Patricia Santana Cruz");
   gtk_about_dialog_set_artists (GTK_ABOUT_DIALOG (dialog), art_work); 
 
+  g_object_unref (logo);
 
   gtk_dialog_run (GTK_DIALOG (dialog));
   gtk_widget_destroy (dialog);
