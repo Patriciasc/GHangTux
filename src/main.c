@@ -38,7 +38,7 @@
 #define FILMS_FILE "themes/films.txt"
 #define OBJECTS_FILE "themes/objects.txt"
 #define PERSONS_FILE "themes/persons.txt"
-#define LOGO "icons/tux_icon.png"
+#define LOGO "icons/icon200x200.png"
 
 #define GUI_FILE "ui/ghangtux.glade"
 #define UI_FILE "ui/menu.ui"
@@ -682,17 +682,21 @@ set_end_game (gpointer data, int winner)
 gchar *
 format_text_with_markup (const gchar *text, int type)
 {
+   gchar *markup = NULL;
+
    switch (type)
    {
       case 0:    /* Display label */
-         g_strdup_printf("<span size=\"large\" font_weight=\"ultrabold\">%s</span>", text);
+         markup = g_strdup_printf("<span size=\"large\" font_weight=\"ultrabold\">%s</span>", text);
          break;
       case 1:    /* Title label */
-         g_strdup_printf("<span size=\"small\">%s</span>", text);
+         markup = g_strdup_printf("<span size=\"small\">%s</span>", text);
          break;
       default:
          g_print ("Problem setting markups\n");
    }
+
+   return markup;
 }
 
 /****************************

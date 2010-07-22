@@ -3,7 +3,7 @@
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
   <object class="GtkWindow" id="main_win">
-    <property name="title" translatable="yes">Hangtux</property>
+    <property name="title" translatable="yes">GHangtux</property>
     <property name="window_position">center</property>
     <signal name="destroy" handler="main_win_destroy"/>
     <child>
