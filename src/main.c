@@ -75,7 +75,7 @@ static void about_action        (GtkAction *action, gpointer data);
 static void  load_image               (const char *file_image);
 static gchar *get_system_file         (const gchar *filename);
 static void  set_end_game             (gpointer data, int winner);
-const gchar  *format_text_with_markup (const gchar *text, int type);
+gchar  *format_text_with_markup       (const gchar *text, int type);
 
 /* --------------------------------------------------------*/
 /* --------------  START: list of actions  ----------------*/
@@ -324,7 +324,7 @@ format_sentence_with_letter (Keyboard *keyboard, const gchar key_name, gpointer 
 {
    gint i = 0;
    gint valid_letter = 0;
-	const gchar *markup = NULL;
+	gchar *markup = NULL;
 
    /* Looks for the label's letter in the sentence. */
    for (i=0; i!=strlen(gamew.sentence); i++)
@@ -430,7 +430,7 @@ get_sentence_action (GtkRadioAction *raction,
    GError *error = NULL;
    GFileInputStream *fstream = NULL; 
    GDataInputStream *stream = NULL;
-   const gchar *markup = NULL;
+   gchar *markup = NULL;
    gsize length = 0;
    gint random = 0;
 
@@ -640,7 +640,7 @@ load_image (const char *file_image)
 static void
 set_end_game (gpointer data, int winner)
 {
-   const gchar *markup = NULL;
+   gchar *markup = NULL;
    
    /* Shows solution. */
    markup = format_text_with_markup (gamew.sentence, 0); 
@@ -678,16 +678,16 @@ set_end_game (gpointer data, int winner)
 }
 
 /* Formats the text with a markup before displaying it. */ 
-const gchar *
+gchar *
 format_text_with_markup (const gchar *text, int type)
 {
    switch (type)
    {
       case 0:    /* Display label */
-         g_strdup (g_strdup_printf("<span size=\"large\" font_weight=\"ultrabold\">%s</span>", text));
+         g_strdup_printf("<span size=\"large\" font_weight=\"ultrabold\">%s</span>", text);
          break;
       case 1:    /* Title label */
-         g_strdup (g_strdup_printf("<span size=\"small\">%s</span>", text));
+         g_strdup_printf("<span size=\"small\">%s</span>", text);
          break;
       default:
          g_print ("Problem setting markups\n");
