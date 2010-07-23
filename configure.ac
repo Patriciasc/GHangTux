@@ -1,4 +1,4 @@
-AC_INIT([ghangtux], [0.1], [patriciasc@openismus.com],
+AC_INIT([ghangtux], [1.0], [patriciasc@openismus.com],
         [ghangtux], [http://openismus.com/])
 AC_PREREQ([2.59])
 AC_CONFIG_AUX_DIR([build-aux])
