@@ -86,21 +86,21 @@ static GtkRadioActionEntry radio_actions[] =
 {
   { "FilmsThemesMenuAction",    /* action name  */ 
     NULL,                       /* stock id     */
-    "_Films",                   /* label        */
+    "Films",                    /* label        */
     "<Ctrl><Shift>f",           /* accelerator  */
     "Selects a random film",    /* tooltip      */
     0},                         /* action value */       
 
   { "ObjectsThemesMenuAction", 
     NULL, 
-    "_Objects", 
+    "Objects", 
     "<Ctrl><Shift>o", 
     "Selects a random object", 
     1},
 
   { "PersonsThemesMenuAction", 
     NULL, 
-    "_Person_s", 
+    "Persons", 
     "<Ctrl><Shift>p", 
     "Selects a random person", 
     2}
@@ -112,7 +112,7 @@ static GtkActionEntry actions[] =
 {
   { "GameMenuAction",            /* action name       */ 
      NULL,                       /* stock id          */
-    "_Game",                     /* label             */
+    "Game",                      /* label             */
     NULL,                        /* accelerator       */
     NULL,                        /* tooltip           */
     NULL                         /* action (callback) */
@@ -120,7 +120,7 @@ static GtkActionEntry actions[] =
   
   { "SettingsMenuAction",
     NULL,
-    "_Settings",
+    "Settings",
     NULL,
     NULL,
     NULL
@@ -128,7 +128,7 @@ static GtkActionEntry actions[] =
 
   { "ThemesMenuAction", 
      NULL, 
-    "_Themes",
+    "Themes",
     NULL,
     NULL,
     NULL
@@ -136,7 +136,7 @@ static GtkActionEntry actions[] =
 
   { "HelpMenuAction", 
     NULL, 
-    "_Help",
+    "Help",
     NULL,
     NULL,
     NULL
@@ -144,7 +144,7 @@ static GtkActionEntry actions[] =
 
   { "NewMenuAction",
     GTK_STOCK_NEW,
-    "_New",
+    "New",
     "<Ctrl><Shift>n",
     "Prepares a new game for the actual theme",
     G_CALLBACK (new_action)
@@ -152,7 +152,7 @@ static GtkActionEntry actions[] =
  
   { "SolveMenuAction",
     GTK_STOCK_APPLY,
-    "_Solve",
+    "Solve",
     "<Ctrl><Shift>s",
     "Displays the solution for the actual game",
     G_CALLBACK (solve_action)
@@ -160,7 +160,7 @@ static GtkActionEntry actions[] =
 
   { "QuitMenuAction", 
     GTK_STOCK_QUIT, 
-    "_Quit", 
+    "Quit", 
     "<Ctrl><Shift>q",
     "Quit the application", 
     G_CALLBACK (quit_action)
@@ -168,7 +168,7 @@ static GtkActionEntry actions[] =
 
   { "AboutHelpMenuAction", 
     GTK_STOCK_ABOUT, 
-    "_About", 
+    "About", 
     "<Ctrl><Shift>a",
     "More information about the application", 
     G_CALLBACK (about_action) }
