@@ -6,7 +6,7 @@
  * #                                                                      #
  * # Copyright (C) 2010 Openismus GmbH                                    #
  * #                                                                      #
- * # Version: 1.0                                                         #  
+ * # Version: 1.1                                                         #  
  * #                                                                      #
  * # Description: A variation of the Hangman game.                        #
  * #                                                                      #
@@ -27,12 +27,14 @@
 
 #include <gtk/gtk.h>
 #include <glib.h>
+#include <glib/gi18n.h>
 #include <gio/gio.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <string.h>
 #include <stdlib.h>
 #include "config.h"
 #include "keyboard.h"
+#include <glib/gi18n.h>
 
 #define TUX_IMG_0 "images/Tux0.png"
 #define FILMS_FILE "themes/films.txt"
@@ -86,23 +88,23 @@ static GtkRadioActionEntry radio_actions[] =
 {
   { "FilmsThemesMenuAction",    /* action name  */ 
     NULL,                       /* stock id     */
-    "Films",                    /* label        */
+    N_("Films"),                 /* label        */
     "<Ctrl><Shift>f",           /* accelerator  */
-    "Selects a random film",    /* tooltip      */
+    N_("Selects a random film"), /* tooltip      */
     0},                         /* action value */       
 
   { "ObjectsThemesMenuAction", 
     NULL, 
-    "Objects", 
+    N_("Objects"), 
     "<Ctrl><Shift>o", 
-    "Selects a random object", 
+    N_("Selects a random object"), 
     1},
 
   { "PersonsThemesMenuAction", 
     NULL, 
-    "Persons", 
+    N_("Persons"), 
     "<Ctrl><Shift>p", 
-    "Selects a random person", 
+    N_("Selects a random person"), 
     2}
 };
 
@@ -112,7 +114,7 @@ static GtkActionEntry actions[] =
 {
   { "GameMenuAction",            /* action name       */ 
      NULL,                       /* stock id          */
-    "Game",                      /* label             */
+    N_("Game"),                   /* label             */
     NULL,                        /* accelerator       */
     NULL,                        /* tooltip           */
     NULL                         /* action (callback) */
@@ -120,7 +122,7 @@ static GtkActionEntry actions[] =
   
   { "SettingsMenuAction",
     NULL,
-    "Settings",
+    N_("Settings"),
     NULL,
     NULL,
     NULL
@@ -128,7 +130,7 @@ static GtkActionEntry actions[] =
 
   { "ThemesMenuAction", 
      NULL, 
-    "Themes",
+    N_("Themes"),
     NULL,
     NULL,
     NULL
@@ -136,7 +138,7 @@ static GtkActionEntry actions[] =
 
   { "HelpMenuAction", 
     NULL, 
-    "Help",
+    N_("Help"),
     NULL,
     NULL,
     NULL
@@ -144,33 +146,33 @@ static GtkActionEntry actions[] =
 
   { "NewMenuAction",
     GTK_STOCK_NEW,
-    "New",
+    N_("New"),
     "<Ctrl><Shift>n",
-    "Prepares a new game for the actual theme",
+    N_("Prepares a new game for the actual theme"),
     G_CALLBACK (new_action)
   },
  
   { "SolveMenuAction",
     GTK_STOCK_APPLY,
-    "Solve",
+    N_("Solve"),
     "<Ctrl><Shift>s",
-    "Displays the solution for the actual game",
+    N_("Displays the solution for the actual game"),
     G_CALLBACK (solve_action)
   },
 
   { "QuitMenuAction", 
     GTK_STOCK_QUIT, 
-    "Quit", 
+    N_("Quit"), 
     "<Ctrl><Shift>q",
-    "Quit the application", 
+    N_("Quit the application"), 
     G_CALLBACK (quit_action)
   },
 
   { "AboutHelpMenuAction", 
     GTK_STOCK_ABOUT, 
-    "About", 
+    N_("About"), 
     "<Ctrl><Shift>a",
-    "More information about the application", 
+    N_("More information about the application"), 
     G_CALLBACK (about_action) }
 };
 
@@ -235,6 +237,11 @@ main (int argc,
    image_bg.blue = 60535;
 
    gtk_init (&argc, &argv);
+  
+   /* Internationalization i18n. */
+   bindtextdomain(GETTEXT_PACKAGE, PROGRAMNAME_LOCALEDIR);
+   bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
+   textdomain(GETTEXT_PACKAGE);
    
    /* Setting up the builder. */
    builder = gtk_builder_new();
@@ -262,6 +269,7 @@ main (int argc,
 
    /* Setting up the UI manager (menu and toolbar). */ 
    def_group = gtk_action_group_new (ACTION_GROUP);
+   gtk_action_group_set_translation_domain (def_group, GETTEXT_PACKAGE);
    gtk_action_group_add_actions (def_group, actions, NUM_ACTIONS, NULL);
    gtk_action_group_add_radio_actions (def_group, radio_actions, NUM_RACTIONS,
                                        0, G_CALLBACK (get_sentence_action),  NULL);
@@ -453,23 +461,23 @@ get_sentence_action (GtkRadioAction *raction,
    {
       case 0:
          gamew.theme_id = 0;
-         markup = format_text_with_markup ("Guess the FILM by typing letters", 1); 
+         markup = format_text_with_markup (_("Guess the FILM by typing letters"), 1); 
          file = g_file_new_for_path (get_system_file(FILMS_FILE));
-         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Films");
+         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), _("Playing theme: Films"));
          break;
 
       case 1:
          gamew.theme_id = 1;
-         markup = format_text_with_markup ("Guess the OBJECT by typing letters", 1); 
+         markup = format_text_with_markup (_("Guess the OBJECT by typing letters"), 1); 
          file = g_file_new_for_path (get_system_file (OBJECTS_FILE));
-         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Objects");
+         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), _("Playing theme: Objects"));
          break;
 
       case 2:
          gamew.theme_id = 2;
-         markup = format_text_with_markup ("Guess the PERSON by typing letters", 1); 
+         markup = format_text_with_markup (_("Guess the PERSON by typing letters"), 1); 
          file = g_file_new_for_path (get_system_file(PERSONS_FILE));
-         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), "Playing theme: Persons");
+         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), _("Playing theme: Persons"));
          break;
 
       default:
@@ -528,7 +536,7 @@ about_action (GtkAction *action,
   };
   
   const gchar *art_work[] = {
-     "Tux images in this game, are based on Wikimedia:\nhttp://commons.wikimedia.org/wiki/File:Tux-G2.png\nby Jan Vansteenkiste.",
+     _("Tux images in this game, are based on Wikimedia:\nhttp://commons.wikimedia.org/wiki/File:Tux-G2.png\nby Jan Vansteenkiste."),
      NULL
   };
      
@@ -554,11 +562,11 @@ about_action (GtkAction *action,
 
   /* Set application data that will be displayed in the main dialog. */
   gtk_about_dialog_set_program_name (GTK_ABOUT_DIALOG (dialog), "GHangTux");
-  gtk_about_dialog_set_version (GTK_ABOUT_DIALOG (dialog), "1.0");
+  gtk_about_dialog_set_version (GTK_ABOUT_DIALOG (dialog), "1.1");
   gtk_about_dialog_set_copyright (GTK_ABOUT_DIALOG (dialog), 
                                   " Copyright (C) 2010 Openismus GmbH");
   gtk_about_dialog_set_comments (GTK_ABOUT_DIALOG (dialog), 
-                                 "GHangTux is a variation of the popular Hangman game.");
+                                 _("GHangTux is a variation of the popular Hangman game."));
 
   /* XXX Need to load the file with the text here */
   gtk_about_dialog_set_license (GTK_ABOUT_DIALOG (dialog), 
@@ -655,19 +663,19 @@ set_end_game (gpointer data, int winner)
    {
       load_image (get_system_file("images/Tux7.png"));
       gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), 
-                          GPOINTER_TO_INT (data), "End of game. Try again!");
+                          GPOINTER_TO_INT (data), _("End of game. Try again!"));
    }
    else if (winner == 1)
    {
       load_image (get_system_file("images/Tux8.png"));
       gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), 
-                          GPOINTER_TO_INT (data), "Congratulations!");
+                          GPOINTER_TO_INT (data), _("Congratulations!"));
    }
    else
    {
       load_image (get_system_file("images/Tux7.png"));
       gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), 
-                          GPOINTER_TO_INT (data), "Solution");
+                          GPOINTER_TO_INT (data), _("Solution"));
    }
       
    /* Set title label */

@@ -9,6 +9,7 @@
 *.cache
 *.m4
 *.in
+*.tar.gz
 config.*
 stamp-h1
 .dirstamp
@@ -20,3 +21,8 @@ Makefile
 INSTALL
 ghangtux
 src/.deps/
+ghangtux.desktop
+po/.intltool-merge-cache
+po/POTFILES
+po/es.gmo
+po/stamp-it

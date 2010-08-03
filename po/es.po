@@ -1,0 +1,165 @@
+# GHangtux Spanish translation.
+# Copyright (C) 2010 Openismus GmbH
+# This file is distributed under the same license as the GHangtux package.
+# Patricia Santana Cruz <patriciasc@openismus.com>, 2010.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-07-23 14:44+0200\n"
+"PO-Revision-Date: 2010-07-23 14:52\n"
+"Last-Translator: Patricia Santana Cruz <patriciasc@openismus.com>\n"
+"Language-Team: Español  <patriciasc@openismus.com>\n"
+"Language: Español\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. action name
+#. stock id
+#: ../src/main.c:90
+msgid "Films"
+msgstr "Películas"
+
+#. label
+#. accelerator
+#: ../src/main.c:92
+msgid "Selects a random film"
+msgstr "Selecciona una película al azar"
+
+#: ../src/main.c:97
+msgid "Objects"
+msgstr "Objetos"
+
+#: ../src/main.c:99
+msgid "Selects a random object"
+msgstr "Selecciona un objeto al azar"
+
+#: ../src/main.c:104
+msgid "Persons"
+msgstr "Personajes"
+
+#: ../src/main.c:106
+msgid "Selects a random person"
+msgstr "Selecciona un personaje al azar"
+
+#. action name
+#. stock id
+#: ../src/main.c:116
+msgid "Game"
+msgstr "Juego"
+
+#: ../src/main.c:124
+msgid "Settings"
+msgstr "Opciones"
+
+#: ../src/main.c:132
+msgid "Themes"
+msgstr "Temas"
+
+#: ../src/main.c:140
+msgid "Help"
+msgstr "Ayuda"
+
+#: ../src/main.c:148
+msgid "New"
+msgstr "Nuevo"
+
+#: ../src/main.c:150
+msgid "Prepares a new game for the actual theme"
+msgstr "Prepara un nuevo juego manteniendo el tema actual"
+
+#: ../src/main.c:156
+msgid "Solve"
+msgstr "Resolver"
+
+#: ../src/main.c:158
+msgid "Displays the solution for the actual game"
+msgstr "Muestra el resultado del juego actual"
+
+#: ../src/main.c:164
+msgid "Quit"
+msgstr "Salir"
+
+#: ../src/main.c:166
+msgid "Quit the application"
+msgstr "Salir de la aplicación"
+
+#: ../src/main.c:172
+msgid "About"
+msgstr "Sobre GHangtux"
+
+#: ../src/main.c:174
+msgid "More information about the application"
+msgstr "Más información sobre la aplicación"
+
+#: ../src/main.c:462
+msgid "Guess the FILM by typing letters"
+msgstr "Adivina la PELÍCULA pulsando letras"
+
+#: ../src/main.c:464
+msgid "Playing theme: Films"
+msgstr "Tema actual: Películas"
+
+#: ../src/main.c:469
+msgid "Guess the OBJECT by typing letters"
+msgstr "Adivina el OBJETO pulsando letras"
+
+#: ../src/main.c:471
+msgid "Playing theme: Objects"
+msgstr "Tema actual: Objetos"
+
+#: ../src/main.c:476
+msgid "Guess the PERSON by typing letters"
+msgstr "Adivina el PERSONAJE pulsando letras"
+
+#: ../src/main.c:478
+msgid "Playing theme: Persons"
+msgstr "Tema actual: Personajes"
+
+#: ../src/main.c:537
+msgid ""
+"Tux images in this game, are based on Wikimedia:\n"
+"http://commons.wikimedia.org/wiki/File:Tux-G2.png\n"
+"by Jan Vansteenkiste."
+msgstr "Las imágenes de tux usadas en este juego,\n"
+"estan basadas en Wikimedia:\n"
+"http://commons.wikimedia.org/wiki/File:Tux-G2.png\n"
+"por Jan Vansteenkiste."
+
+#: ../src/main.c:567
+msgid "GHangTux is a variation of the popular Hangman game."
+msgstr "GHangtux es una variación del popular juego \"El ahorcado\""
+
+#: ../src/main.c:664
+msgid "End of game. Try again!"
+msgstr "Fin del juego. Inténtalo de nuevo!"
+
+#: ../src/main.c:670
+msgid "Congratulations!"
+msgstr "Enhorabuena!"
+
+#: ../src/main.c:676
+msgid "Solution"
+msgstr "Solución"
+
+#. ***************************
+#. * END: Auxiliary functions *
+#. * *************************
+#: ../ghangtux.desktop.in.h:1
+msgid "A variation of the Hangman game."
+msgstr "Una variación del popular juego \"El ahorcado\""
+
+#: ../ghangtux.desktop.in.h:2 ../data/ui/ghangtux.glade.h:2
+msgid "GHangtux"
+msgstr "GHangtux"
+
+#: ../ghangtux.desktop.in.h:3
+msgid "GHangtux game"
+msgstr "Juago GHangtux"
+
+#: ../data/ui/ghangtux.glade.h:1
+msgid "Choose a theme from the Game's menu"
+msgstr "Elige un tema del menú Juego"
