@@ -10,18 +10,18 @@
  * #                                                                      #
  * # Description: A variation of the Hangman game.                        #
  * #                                                                      #
- * # This program is free software; you can redistribute it and/or modify #
+ * # GHangtux is free software; you can redistribute it and/or modify     #
  * # it under the terms of the GNU General Public License as published by #
  * # the Free Software Foundation; either version 3 of the License,       #
  * # or (at your option) any later version.                               #
  * #                                                                      #
- * # This program is distributed in the hope that it will be useful,      #
+ * # GHangtux  is distributed in the hope that it will be useful,         #
  * # but WITHOUT ANY WARRANTY; without even the implied warranty of       #
  * # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU    #
  * # General Public License for more details.                             #
  * #                                                                      #
  * # You should have received a copy of the GNU General Public License    #
- * # along with this program. If not, see <http://www.gnu.org/licenses/>. #
+ * # along with GHangtux. If not, see <http://www.gnu.org/licenses/>.     #
  * ########################################################################
 */
 
@@ -34,7 +34,6 @@
 #include <stdlib.h>
 #include "config.h"
 #include "keyboard.h"
-#include <glib/gi18n.h>
 
 #define TUX_IMG_0 "images/Tux0.png"
 #define FILMS_FILE "themes/films.txt"
@@ -321,17 +320,17 @@ main (int argc,
 
 /* Destroy main window. */
 void 
-main_win_destroy (GtkObject *window, 
-                  gpointer data)
+main_win_destroy (G_GNUC_UNUSED GtkObject *window, 
+                  G_GNUC_UNUSED gpointer data)
 {
    gtk_main_quit();
 }
 
 /* Formats the sentence with a new letter for displaying.*/ 
 void
-format_sentence_with_letter (Keyboard *keyboard, const gchar key_name, gpointer data)
+format_sentence_with_letter (G_GNUC_UNUSED Keyboard *keyboard, const gchar key_name, gpointer data)
 {
-   gint i = 0;
+   guint i = 0;
    gint valid_letter = 0;
 	gchar *markup = NULL;
 
@@ -386,8 +385,8 @@ format_sentence_with_letter (Keyboard *keyboard, const gchar key_name, gpointer 
 
 /* Loads a game for the same current theme. */
 static void
-new_action (GtkAction *action,
-            gpointer data)
+new_action (G_GNUC_UNUSED GtkAction *action,
+            G_GNUC_UNUSED gpointer data)
 {
    GtkRadioAction *raction_init = NULL;
 
@@ -415,7 +414,7 @@ new_action (GtkAction *action,
 
 /* Displays the solution for the current game. */
 static void
-solve_action (GtkAction *action,
+solve_action ( G_GNUC_UNUSED GtkAction *action,
               gpointer data)
 {
    set_end_game (data, -1);
@@ -423,15 +422,15 @@ solve_action (GtkAction *action,
 
 /* Quits the application from the menu. */
 static void
-quit_action (GtkAction *action,
-             gpointer data)
+quit_action (G_GNUC_UNUSED GtkAction *action,
+             G_GNUC_UNUSED gpointer data)
 {
    main_win_destroy (NULL,NULL);
 }
 
 /* Selects a random sentence or word from the game files. */
 static void
-get_sentence_action (GtkRadioAction *raction,
+get_sentence_action ( G_GNUC_UNUSED GtkRadioAction *raction,
                      GtkRadioAction *curr_raction,
                      gpointer data)
 {
@@ -518,8 +517,8 @@ get_sentence_action (GtkRadioAction *raction,
 
 /* Shows an about dialog from the application. */
 static void
-about_action (GtkAction *action,
-              gpointer data){
+about_action ( G_GNUC_UNUSED GtkAction *action,
+               G_GNUC_UNUSED gpointer data){
 
   GtkWidget *dialog;
   GdkPixbuf *logo;
@@ -536,7 +535,7 @@ about_action (GtkAction *action,
   };
   
   const gchar *art_work[] = {
-     _("Tux images in this game, are based on Wikimedia:\nhttp://commons.wikimedia.org/wiki/File:Tux-G2.png\nby Jan Vansteenkiste."),
+     "Tux images Copyright Wikimedia:\nhttp://commons.wikimedia.org/wiki/File:Tux-G2.png. Jan Vansteenkiste.",
      NULL
   };
      

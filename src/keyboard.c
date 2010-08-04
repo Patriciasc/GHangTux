@@ -109,7 +109,8 @@ keyboard_get_type (void)
          NULL,                                  /* class_data */
          sizeof (Keyboard),                     /* instance_size */
          0,                                     /* n_preallocs */
-         (GInstanceInitFunc) keyboard_init,
+         (GInstanceInitFunc) keyboard_init,     /* instace_init */
+         NULL                                   /* value_table */
       };
 
       keyboard_type = g_type_register_static (GTK_TYPE_TABLE, "Keyboard", &keyboard_info, 0);

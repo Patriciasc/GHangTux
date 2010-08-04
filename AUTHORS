@@ -16,6 +16,9 @@ Patricia Santana Cruz  <patriciasc@openismus.com>
 Openismus GmbH
 http://www.openismus.com/
 
+dk-warn.m4 file for enabling warnings during compilation
+by Daniel Elstner  <daniel.kitta@gmail.com>
+
 Tux images based on Wikimedia:
 http://commons.wikimedia.org/wiki/File:Tux-G2.png
 by Jan Vansteenkiste

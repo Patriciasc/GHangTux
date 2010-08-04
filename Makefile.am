@@ -1,7 +1,40 @@
-AUTOMAKE_OPTIONS = subdir-objects
-ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} 
+#############################################################################
+# File: GHangtux - Makefile.am                                              #
+#                                                                           #
+# Author: Patricia Santana Cruz  <patriciasc@openismus.com>                 #
+#                                                                           #  
+# Copyright (C) 2010 Openismus GmbH                                         #
+# 																									 #
+# Version 1.1                                                               #
+# 																									 #
+# GHangtux is free software; you can redistribute it and/or modify          #
+# it under the terms of the GNU General Public License as published         #
+# by the Free Software Foundation; either version 3 of the License,         #
+# or (at your option) any later version.                                    #
+# 																									 #
+# GHangtux is distributed in the hope that it will be useful,               #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of            #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             #
+# GNU General Public License for more details.                              #
+# 																									 #
+# You should have received a copy of the GNU General Public License         #
+# along with GHangtux. If not, see <http://www.gnu.org/licenses/>. 			 #
+#  																							    #
+# This project does not use recursive make, but a single toplevel Makefile  #
+# to build the entire tree (excluding the po subdirectory as gettext comes  #
+# with its own build system).  Read Peter Miller's excellent paper to learn #
+# why recursive make invocations are both slow and error-prone: 				 #
+# http://www.cse.iitb.ac.in/~soumen/teach/cs699a1999/make.html 				 #
+#############################################################################
 
-AM_CPPFLAGS = $(DEP_CFLAGS) -DPROGRAMNAME_LOCALEDIR=\"${PROGRAMNAME_LOCALEDIR}\"
+AUTOMAKE_OPTIONS = subdir-objects
+ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS} 
+DISTCHECK_CONFIGURE_FLAGS = --disable-schemas-install --enable-warnings=fatal
+
+AM_CPPFLAGS = $(DEP_CFLAGS) -DPROGRAMNAME_LOCALEDIR=\"${PROGRAMNAME_LOCALEDIR}\" $(GHANGTUX_WARNING_FLAGS)
+ghangtux_LDADD = $(DEP_LIBS)
+
+SUBDIRS = po
 
 bin_PROGRAMS = ghangtux
 ghangtux_SOURCES = src/main.c \
@@ -33,8 +66,6 @@ dist_themes_DATA = data/themes/persons.txt \
                    data/themes/objects.txt \
                    data/themes/films.txt 
 
-ghangtux_LDADD = $(DEP_LIBS)
-
 desktopdir = $(datadir)/applications
 desktop_in_files = ghangtux.desktop.in
 desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
@@ -49,8 +80,6 @@ DISTCLEANFILES = intltool-extract \
                  intltool-update\
                  po/.intltool-merge-cache \
 					  $(desktop_DATA)
-
-SUBDIRS = po
 
 dist_noinst_DATA = $(desktop_in_files)
 dist_noinst_SCRIPTS = autogen.sh \
