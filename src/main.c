@@ -72,6 +72,7 @@ static void quit_action         (GtkAction *action, gpointer data);
 static void get_sentence_action (GtkRadioAction *raction,
                                  GtkRadioAction *curr_raction, gpointer data);
 static void about_action        (GtkAction *action, gpointer data);
+static void extern_key_release  (GtkWidget *window, GdkEventKey *event, gpointer data);
 
 /* Auxiliary functions. */
 static void  load_image               (const char *file_image);
@@ -317,8 +318,12 @@ main (int argc,
    
    /* Setting up the keyboard. */
    gamew.keyboard = keyboard_new();
+   /* Using game's keyboard */
    g_signal_connect (gamew.keyboard, "key_clicked",
                      G_CALLBACK (format_sentence_with_letter), NULL);
+   /* Using external keyboard */
+   g_signal_connect (window, "key-release-event", 
+                     G_CALLBACK (extern_key_release), NULL);
    gtk_box_pack_start (GTK_BOX (vbox2), gamew.keyboard, FALSE, FALSE, 0);
    gtk_box_reorder_child (GTK_BOX (vbox2), gamew.keyboard, 3);
 
@@ -352,7 +357,9 @@ main_win_destroy (G_GNUC_UNUSED GtkObject *window,
 
 /* Formats the sentence with a new letter for displaying.*/ 
 void
-format_sentence_with_letter (G_GNUC_UNUSED Keyboard *keyboard, const gchar key_name, gpointer data)
+format_sentence_with_letter (G_GNUC_UNUSED Keyboard *keyboard, 
+                             const gchar key_name,
+                             gpointer data)
 {
    guint i = 0;
    gint valid_letter = 0;
@@ -398,6 +405,14 @@ format_sentence_with_letter (G_GNUC_UNUSED Keyboard *keyboard, const gchar key_n
       }
    }
    g_free (markup);
+}
+
+static void
+extern_key_release  (G_GNUC_UNUSED GtkWidget *window, 
+                     GdkEventKey *event,
+                     G_GNUC_UNUSED gpointer data)
+{
+   format_sentence_with_letter (KEYBOARD (gamew.keyboard), *(event->string), NULL);
 }
 
 /******************************

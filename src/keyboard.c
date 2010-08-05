@@ -39,7 +39,7 @@ keyboard_init (Keyboard *keyboard)
 {
    gint i;
    gint j;
-   gchar A = 65;   /* ascci A = 65 */
+   gchar ascci_char = 65;   /* ascci A = 65 */
    gfloat xyaling = 0.50;
    const gchar *label;
 
@@ -51,7 +51,7 @@ keyboard_init (Keyboard *keyboard)
    {
       for (j=0; j<N_COLS; j++)      
       {
-         label = g_strdup_printf("_%c",A);
+         label = g_strdup_printf("%c",ascci_char);
          keyboard->button[i][j] = gtk_button_new_with_mnemonic (label);
 
          gtk_button_set_use_underline (GTK_BUTTON (keyboard->button[i][j]), TRUE);
@@ -65,7 +65,7 @@ keyboard_init (Keyboard *keyboard)
                            (gpointer) keyboard);
 
          gtk_widget_show (keyboard->button[i][j]);
-         A++;
+         ascci_char++;
       }
    }
 }
@@ -83,7 +83,7 @@ keyboard_key_set_insensitive (GtkWidget *key, gpointer keyboard)
    g_signal_emit (keyboard, 
                   keyboard_signals[KEY_CLICKED],
                   0,
-                  key_name[1]);
+                  key);
 }
 
 /****************************

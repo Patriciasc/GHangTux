@@ -32,7 +32,7 @@ struct _KeyboardClass
 {
   GtkTableClass parent_class;
 
-  void (* key_clicked) (Keyboard *key, const gchar *key_name);
+  void (* key_clicked) (Keyboard *keyboard, const gchar *key_name);
 };
 
 /* For the user. */
