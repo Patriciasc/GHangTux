@@ -83,7 +83,7 @@ keyboard_key_set_insensitive (GtkWidget *key, gpointer keyboard)
    g_signal_emit (keyboard, 
                   keyboard_signals[KEY_CLICKED],
                   0,
-                  key);
+                  key_name[0]);
 }
 
 /****************************

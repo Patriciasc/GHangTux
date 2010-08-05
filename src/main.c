@@ -86,12 +86,12 @@ gchar  *format_text_with_markup       (const gchar *text, int type);
 
 static GtkRadioActionEntry radio_actions[] =
 {
-  { "FilmsThemesMenuAction",    /* action name  */ 
-    NULL,                       /* stock id     */
-    N_("Films"),                 /* label        */
-    "<Ctrl><Shift>f",           /* accelerator  */
+  { "FilmsThemesMenuAction",     /* action name  */ 
+    NULL,                        /* stock id     */
+    N_("_Films"),                /* label        */
+    "<Ctrl><Shift>f",            /* accelerator  */
     N_("Selects a random film"), /* tooltip      */
-    0},                         /* action value */       
+    0},                          /* action value */       
 
   { "ObjectsThemesMenuAction", 
     NULL, 
@@ -114,7 +114,7 @@ static GtkActionEntry actions[] =
 {
   { "GameMenuAction",            /* action name       */ 
      NULL,                       /* stock id          */
-    N_("Game"),                   /* label             */
+    N_("_Game"),                   /* label             */
     NULL,                        /* accelerator       */
     NULL,                        /* tooltip           */
     NULL                         /* action (callback) */
@@ -122,7 +122,7 @@ static GtkActionEntry actions[] =
   
   { "SettingsMenuAction",
     NULL,
-    N_("Settings"),
+    N_("_Settings"),
     NULL,
     NULL,
     NULL
@@ -130,7 +130,7 @@ static GtkActionEntry actions[] =
 
   { "ThemesMenuAction", 
      NULL, 
-    N_("Themes"),
+    N_("_Themes"),
     NULL,
     NULL,
     NULL
@@ -138,7 +138,7 @@ static GtkActionEntry actions[] =
 
   { "HelpMenuAction", 
     NULL, 
-    N_("Help"),
+    N_("_Help"),
     NULL,
     NULL,
     NULL
@@ -146,32 +146,32 @@ static GtkActionEntry actions[] =
 
   { "NewMenuAction",
     GTK_STOCK_NEW,
-    N_("New"),
-    "<Ctrl><Shift>n",
+    N_("_New"),
+    NULL,
     N_("Prepares a new game for the actual theme"),
     G_CALLBACK (new_action)
   },
  
   { "SolveMenuAction",
     GTK_STOCK_APPLY,
-    N_("Solve"),
-    "<Ctrl><Shift>s",
+    N_("S_olve"),
+    "<Ctrl><Shift>q", 
     N_("Displays the solution for the actual game"),
     G_CALLBACK (solve_action)
   },
 
   { "QuitMenuAction", 
     GTK_STOCK_QUIT, 
-    N_("Quit"), 
-    "<Ctrl><Shift>q",
+    N_("_Quit"), 
+    "<Ctrl><Shift>q", 
     N_("Quit the application"), 
     G_CALLBACK (quit_action)
   },
 
   { "AboutHelpMenuAction", 
     GTK_STOCK_ABOUT, 
-    N_("About"), 
-    "<Ctrl><Shift>a",
+    N_("_About"), 
+    "<Ctrl><Shift>a", 
     N_("More information about the application"), 
     G_CALLBACK (about_action) }
 };
@@ -365,7 +365,9 @@ format_sentence_with_letter (G_GNUC_UNUSED Keyboard *keyboard,
    gint valid_letter = 0;
 	gchar *markup = NULL;
    guint length = strlen(gamew.sentence);
-
+  
+   g_print("LETRA: %c\n",key_name);
+  
    /* Looks for the label's letter in the sentence. */
    for (i=0; i!=length; i++)
    { 
@@ -412,7 +414,8 @@ extern_key_release  (G_GNUC_UNUSED GtkWidget *window,
                      GdkEventKey *event,
                      G_GNUC_UNUSED gpointer data)
 {
-   format_sentence_with_letter (KEYBOARD (gamew.keyboard), *(event->string), NULL);
+   gchar *up_char = g_ascii_strup(event->string,-1);
+   format_sentence_with_letter (KEYBOARD (gamew.keyboard), *up_char, NULL);
 }
 
 /******************************
