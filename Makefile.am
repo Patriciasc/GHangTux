@@ -29,7 +29,7 @@
 
 AUTOMAKE_OPTIONS = subdir-objects
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS} 
-DISTCHECK_CONFIGURE_FLAGS = --disable-schemas-install --enable-warnings=fatal
+DISTCHECK_CONFIGURE_FLAGS = --enable-warnings=fatal
 
 AM_CPPFLAGS = $(DEP_CFLAGS) -DPROGRAMNAME_LOCALEDIR=\"${PROGRAMNAME_LOCALEDIR}\" $(GHANGTUX_WARNING_FLAGS)
 ghangtux_LDADD = $(DEP_LIBS)
@@ -56,10 +56,11 @@ uidir = $(pkgdatadir)/ui
 dist_ui_DATA = data/ui/ghangtux.glade \
                data/ui/menu.ui
 
-icon48x48dir = $(pkgdatadir)/icons
-dist_icon48x48_DATA = data/icons/icon48x48.png
-icon200x200dir = $(pkgdatadir)/icons
-dist_icon200x200_DATA = data/icons/icon200x200.png
+iconsdir = $(pkgdatadir)/icons/hicolor
+appicon48dir = $(iconsdir)/48x48/apps
+dist_appicon48_DATA = data/icons/48x48/ghangtux.png
+appicon200dir = $(iconsdir)/200x200/apps
+dist_appicon200_DATA = data/icons/200x200/ghangtux.png
 
 themesdir = $(pkgdatadir)/themes
 dist_themes_DATA = data/themes/persons.txt \

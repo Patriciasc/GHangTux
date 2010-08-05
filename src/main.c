@@ -39,7 +39,7 @@
 #define FILMS_FILE "themes/films.txt"
 #define OBJECTS_FILE "themes/objects.txt"
 #define PERSONS_FILE "themes/persons.txt"
-#define LOGO "icons/icon200x200.png"
+#define LOGO "icons/hicolor/200x200/apps/ghangtux.png"
 
 #define GUI_FILE "ui/ghangtux.glade"
 #define UI_FILE "ui/menu.ui"
@@ -198,6 +198,7 @@ struct _GameWidget
    GtkWidget *statusbar;      /* game status bar */
    gint scontext;             /* game status bar's context */
    gint theme_id;             /* current theme's identifier */
+   GdkPixbuf *logo;            /* application's logo */
 };
 
 Gamewidget gamew;
@@ -230,6 +231,7 @@ main (int argc,
    gamew.keyboard = NULL;
    gamew.statusbar = NULL;
    gamew.scontext = 0;
+   gamew.logo = NULL;
 
    image_bg.red = 50535;
    image_bg.green = 55535;
@@ -261,7 +263,25 @@ main (int argc,
    vbox2 = GTK_WIDGET (gtk_builder_get_object (builder, VBOX2));
    eventbox = GTK_WIDGET (gtk_builder_get_object (builder, EVENTBOX));
    gtk_widget_modify_bg (eventbox, 0, &image_bg);
+   
+    
+   /* XXX this is not the definitive image */
+   gamew.logo = gdk_pixbuf_new_from_file (get_system_file (LOGO), &error);
 
+   /* Set the application logo or handle the error. */
+   if (error != NULL)
+   {
+      if (error->domain == GDK_PIXBUF_ERROR)
+         g_print ("GdkPixbufError: %s\n", error->message);
+      else if (error->domain == G_FILE_ERROR)
+         g_print ("GFileError: %s\n", error->message);
+      else
+         g_print ("An error in the unexpected domain:%d has occurred!\n", error->domain);
+
+      g_error_free (error);
+   }
+
+   gtk_window_set_icon (GTK_WINDOW (window), gamew.logo);
 
    gtk_builder_connect_signals (builder,NULL);
    g_object_unref (G_OBJECT(builder));
@@ -314,6 +334,10 @@ main (int argc,
    return 0;
 } 
 
+/* G_GNUC_UNUSED is used up this point for desabling
+ * warnings when a parameter in a function is not
+ * used */
+
 /********************************
  * START: Callbakcs for signals *
  * ******************************/
@@ -333,9 +357,10 @@ format_sentence_with_letter (G_GNUC_UNUSED Keyboard *keyboard, const gchar key_n
    guint i = 0;
    gint valid_letter = 0;
 	gchar *markup = NULL;
+   guint length = strlen(gamew.sentence);
 
    /* Looks for the label's letter in the sentence. */
-   for (i=0; i!=strlen(gamew.sentence); i++)
+   for (i=0; i!=length; i++)
    { 
       if (gamew.sentence[i] == key_name)
       {
@@ -521,8 +546,6 @@ about_action ( G_GNUC_UNUSED GtkAction *action,
                G_GNUC_UNUSED gpointer data){
 
   GtkWidget *dialog;
-  GdkPixbuf *logo;
-  GError *error = NULL;
 
   const gchar *authors[] = {
     "Patricia Santana Cruz", 
@@ -541,23 +564,8 @@ about_action ( G_GNUC_UNUSED GtkAction *action,
      
   dialog = gtk_about_dialog_new ();
   
-  /* XXX this is not the definitive image */
-  logo = gdk_pixbuf_new_from_file (get_system_file (LOGO), &error);
-
-  /* Set the application logo or handle the error. */
-  if (error == NULL)
-    gtk_about_dialog_set_logo (GTK_ABOUT_DIALOG (dialog), logo);
-  else
-  {
-    if (error->domain == GDK_PIXBUF_ERROR)
-      g_print ("GdkPixbufError: %s\n", error->message);
-    else if (error->domain == G_FILE_ERROR)
-      g_print ("GFileError: %s\n", error->message);
-    else
-      g_print ("An error in the unexpected domain:%d has occurred!\n", error->domain);
-
-    g_error_free (error);
-  }
+  /* Set logo. */
+  gtk_about_dialog_set_logo (GTK_ABOUT_DIALOG (dialog), gamew.logo);
 
   /* Set application data that will be displayed in the main dialog. */
   gtk_about_dialog_set_program_name (GTK_ABOUT_DIALOG (dialog), "GHangTux");
@@ -581,7 +589,7 @@ about_action ( G_GNUC_UNUSED GtkAction *action,
                                            "Patricia Santana Cruz");
   gtk_about_dialog_set_artists (GTK_ABOUT_DIALOG (dialog), art_work); 
 
-  g_object_unref (logo);
+  g_object_unref (gamew.logo);
 
   gtk_dialog_run (GTK_DIALOG (dialog));
   gtk_widget_destroy (dialog);
