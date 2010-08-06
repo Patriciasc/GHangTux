@@ -219,6 +219,7 @@ main (int argc,
    GtkUIManager *ui_manager = NULL;
    GtkRadioAction *raction_init = NULL;
    GError *error = NULL;
+   static gchar *sys_file = NULL;
    GdkColor image_bg;
 
    gamew.sentence = NULL;
@@ -248,12 +249,14 @@ main (int argc,
    /* Setting up the builder. */
    builder = gtk_builder_new();
    
-   if (!gtk_builder_add_from_file (builder, get_system_file (GUI_FILE), &error))
+   if (!gtk_builder_add_from_file (builder, sys_file = get_system_file (GUI_FILE), &error))
    {
      g_message ("Building builder failed: %s\n", error->message);
      g_error_free (error);
      return 1;
    }
+
+   g_free (sys_file);
 
    window = GTK_WIDGET (gtk_builder_get_object (builder,WIN));
    vbox = GTK_WIDGET (gtk_builder_get_object (builder, VBOX));
@@ -267,10 +270,10 @@ main (int argc,
    
     
    /* XXX this is not the definitive image */
-   gamew.logo = gdk_pixbuf_new_from_file (get_system_file (LOGO), &error);
-
+   gamew.logo = gdk_pixbuf_new_from_file (sys_file = get_system_file (LOGO), &error);
+   
    /* Set the application logo or handle the error. */
-   if (error != NULL)
+   if (error)
    {
       if (error->domain == GDK_PIXBUF_ERROR)
          g_print ("GdkPixbufError: %s\n", error->message);
@@ -281,6 +284,8 @@ main (int argc,
 
       g_error_free (error);
    }
+
+   g_free (sys_file);
 
    gtk_window_set_icon (GTK_WINDOW (window), gamew.logo);
 
@@ -297,13 +302,15 @@ main (int argc,
    ui_manager = gtk_ui_manager_new ();
    gtk_ui_manager_insert_action_group (ui_manager, def_group, 0);
    
-   if (!gtk_ui_manager_add_ui_from_file (ui_manager, get_system_file (UI_FILE), &error))
+   if (!gtk_ui_manager_add_ui_from_file (ui_manager, sys_file = get_system_file (UI_FILE), &error))
    {
       g_message ("Building menus failed: %s\n", error->message);
       g_error_free (error);
       return 1;
    }
   
+   g_free (sys_file);
+
    gtk_window_add_accel_group (GTK_WINDOW (window), 
                                gtk_ui_manager_get_accel_group (ui_manager));
 
@@ -315,7 +322,7 @@ main (int argc,
    gtk_toolbar_set_style (GTK_TOOLBAR (toolbar), GTK_TOOLBAR_ICONS);
    gtk_box_pack_start (GTK_BOX (vbox), toolbar, FALSE, FALSE, 0);
    gtk_box_reorder_child (GTK_BOX (vbox), toolbar, 1);
-   
+  
    /* Setting up the keyboard. */
    gamew.keyboard = keyboard_new();
    /* Using game's keyboard */
@@ -332,7 +339,11 @@ main (int argc,
    /* Preparing game. */
    raction_init = gtk_radio_action_new ("init", "init", "init", "init", 0);
    get_sentence_action(NULL,raction_init,NULL); 
-   load_image(get_system_file(TUX_IMG_0));
+   load_image (sys_file = get_system_file(TUX_IMG_0));
+
+   g_free (sys_file);
+   g_object_unref (ui_manager);
+   g_object_unref (raction_init);
    gamew.n_img ++;
 
    gtk_main();
@@ -364,6 +375,7 @@ format_sentence_with_letter (G_GNUC_UNUSED Keyboard *keyboard,
    guint i = 0;
    gint valid_letter = 0;
 	gchar *markup = NULL;
+   gchar *image = NULL;
    guint length = strlen(gamew.sentence);
   
    g_print("LETRA: %c\n",key_name);
@@ -381,6 +393,7 @@ format_sentence_with_letter (G_GNUC_UNUSED Keyboard *keyboard,
    if (valid_letter == 1)
    {
       gamew.valid_chars = g_strconcat (gamew.valid_chars, &key_name, NULL);
+      g_free (gamew.display_sentence);
       gamew.display_sentence = g_strdup (gamew.sentence);
       g_strcanon ( gamew.display_sentence, gamew.valid_chars, '_');
       markup = format_text_with_markup (gamew.display_sentence, 0); 
@@ -397,7 +410,8 @@ format_sentence_with_letter (G_GNUC_UNUSED Keyboard *keyboard,
       /* Loads a new image of the Hangtux. */ 
       if (gamew.n_img < NUM_IMAGES) 
       {
-         load_image (get_system_file(g_strdup_printf("images/Tux%i.png",gamew.n_img)));
+         image = g_strdup_printf("images/Tux%i.png",gamew.n_img);
+         load_image (get_system_file(image));
          gamew.n_img++;
       }
       /* Player loses. */
@@ -406,6 +420,8 @@ format_sentence_with_letter (G_GNUC_UNUSED Keyboard *keyboard,
          set_end_game(data,FALSE);
       }
    }
+   
+   g_free (image);
    g_free (markup);
 }
 
@@ -437,22 +453,24 @@ new_action (G_GNUC_UNUSED GtkAction *action,
    {
       case 0:
          raction_init = gtk_radio_action_new ("init", "init", "init", "init", 0);
-         get_sentence_action(NULL,raction_init,NULL); 
          break;
 
       case 1:
          raction_init = gtk_radio_action_new ("init", "init", "init", "init", 1);
-         get_sentence_action(NULL,raction_init,NULL); 
          break;
 
       case 2:
          raction_init = gtk_radio_action_new ("init", "init", "init", "init", 2);
-         get_sentence_action(NULL,raction_init,NULL); 
          break;
 
       default:
          g_print (" Problem loading new game for same theme\n");
+         break;
    }
+   
+   get_sentence_action(NULL,raction_init,NULL); 
+   
+   g_object_unref (raction_init);
 }
 
 /* Displays the solution for the current game. */
@@ -481,6 +499,7 @@ get_sentence_action ( G_GNUC_UNUSED GtkRadioAction *raction,
    GError *error = NULL;
    GFileInputStream *fstream = NULL; 
    GDataInputStream *stream = NULL;
+   static gchar *sys_file = NULL;
    gchar *markup = NULL;
    gsize length = 0;
    gint random = 0;
@@ -490,9 +509,11 @@ get_sentence_action ( G_GNUC_UNUSED GtkRadioAction *raction,
    {
       keyboard_set_sensitive (KEYBOARD (gamew.keyboard), TRUE);
       gamew.valid_chars = NULL;
-      load_image(get_system_file (TUX_IMG_0));
+      load_image(sys_file = get_system_file (TUX_IMG_0));
       gamew.n_img = 1;
    }
+ 
+   g_free (sys_file);   
 
    /* Status bar context. */
    gamew.scontext = gtk_statusbar_get_context_id (
@@ -504,21 +525,21 @@ get_sentence_action ( G_GNUC_UNUSED GtkRadioAction *raction,
       case 0:
          gamew.theme_id = 0;
          markup = format_text_with_markup (_("Guess the FILM by typing letters"), 1); 
-         file = g_file_new_for_path (get_system_file(FILMS_FILE));
+         file = g_file_new_for_path (sys_file = get_system_file(FILMS_FILE));
          gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), _("Playing theme: Films"));
          break;
 
       case 1:
          gamew.theme_id = 1;
          markup = format_text_with_markup (_("Guess the OBJECT by typing letters"), 1); 
-         file = g_file_new_for_path (get_system_file (OBJECTS_FILE));
+         file = g_file_new_for_path (sys_file = get_system_file (OBJECTS_FILE));
          gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), _("Playing theme: Objects"));
          break;
 
       case 2:
          gamew.theme_id = 2;
          markup = format_text_with_markup (_("Guess the PERSON by typing letters"), 1); 
-         file = g_file_new_for_path (get_system_file(PERSONS_FILE));
+         file = g_file_new_for_path (sys_file = get_system_file(PERSONS_FILE));
          gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), _("Playing theme: Persons"));
          break;
 
@@ -534,19 +555,31 @@ get_sentence_action ( G_GNUC_UNUSED GtkRadioAction *raction,
       g_message ("Creating file stream error: %s", error->message);
       g_error_free (error);
    }
+   
+   g_free (markup);
 
    stream = g_data_input_stream_new (G_INPUT_STREAM(fstream));
 
    /* Select a random sentence from the file. */
    random = g_random_int_range (MIN_RANDOM, MAX_RANDOM);
-
+   
    while (((gamew.sentence = g_data_input_stream_read_line (stream, &length, NULL, 
             &error)) != NULL) && (random != 0))
    {
-      random--;
+      if (error)
+      {
+         g_message ("Building menus failed: %s\n", error->message);
+         g_error_free (error);
+      }
+      else
+      {
+         random--;
+         g_free (gamew.sentence);
+      }
    }
    
    /* Format the sentence for displaying the first time. */
+   g_free (gamew.display_sentence);
    gamew.display_sentence = g_strdup (gamew.sentence);
    gamew.valid_chars = " ";
    g_strcanon ( gamew.display_sentence, gamew.valid_chars, '_');
@@ -554,7 +587,9 @@ get_sentence_action ( G_GNUC_UNUSED GtkRadioAction *raction,
    gtk_label_set_markup (GTK_LABEL (gamew.display_label), markup);
    
    g_object_unref (file);
+   g_object_unref (stream);
    g_object_unref (fstream);
+   g_free (sys_file);
    g_free (markup);
 }
 
@@ -655,7 +690,7 @@ load_image (const char *file_image)
    
    tux_image = gdk_pixbuf_new_from_file (file_image, &error);
 
-   if (error != NULL)
+   if (error)
    {
       if (error->domain == GDK_PIXBUF_ERROR)
          g_print ("GdkPixbufError: %s\n", error->message);
@@ -668,12 +703,14 @@ load_image (const char *file_image)
    }
    
    gtk_image_set_from_pixbuf (gamew.image, tux_image); 
+   g_object_unref (G_OBJECT (tux_image));
 }
 
 /* Sets up the end of the game. */
 static void
 set_end_game (gpointer data, int winner)
 {
+   static gchar *sys_file = NULL;
    gchar *markup = NULL;
    
    /* Shows solution. */
@@ -686,23 +723,23 @@ set_end_game (gpointer data, int winner)
                                                   "Statusbar");
    if (winner == 0)
    {
-      load_image (get_system_file("images/Tux7.png"));
+      load_image (sys_file = get_system_file("images/Tux7.png"));
       gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), 
                           GPOINTER_TO_INT (data), _("End of game. Try again!"));
    }
    else if (winner == 1)
    {
-      load_image (get_system_file("images/Tux8.png"));
+      load_image (sys_file = get_system_file("images/Tux8.png"));
       gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), 
                           GPOINTER_TO_INT (data), _("Congratulations!"));
    }
    else
    {
-      load_image (get_system_file("images/Tux7.png"));
+      load_image (sys_file = get_system_file("images/Tux7.png"));
       gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), 
                           GPOINTER_TO_INT (data), _("Solution"));
    }
-      
+
    /* Set title label */
    gtk_label_set_text (gamew.title_label, " "); 
 

@@ -41,7 +41,7 @@ keyboard_init (Keyboard *keyboard)
    gint j;
    gchar ascci_char = 65;   /* ascci A = 65 */
    gfloat xyaling = 0.50;
-   const gchar *label;
+   gchar *label;
 
   
    gtk_table_resize (GTK_TABLE (keyboard), N_ROWS, N_COLS);
@@ -53,6 +53,7 @@ keyboard_init (Keyboard *keyboard)
       {
          label = g_strdup_printf("%c",ascci_char);
          keyboard->button[i][j] = gtk_button_new_with_mnemonic (label);
+         g_free (label);
 
          gtk_button_set_use_underline (GTK_BUTTON (keyboard->button[i][j]), TRUE);
          gtk_button_set_focus_on_click (GTK_BUTTON (keyboard->button[i][j]), TRUE);
