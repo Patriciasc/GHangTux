@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Categories=Game;
+Version=1.0
+_Name=GHangtux
+_GenericName=GHangtux game
+_Comment=A variation of the Hangman game.
+Icon=ghangtux
+Exec=ghangtux

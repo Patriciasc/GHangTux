@@ -378,8 +378,6 @@ format_sentence_with_letter (G_GNUC_UNUSED Keyboard *keyboard,
    gchar *image = NULL;
    guint length = strlen(gamew.sentence);
   
-   g_print("LETRA: %c\n",key_name);
-  
    /* Looks for the label's letter in the sentence. */
    for (i=0; i!=length; i++)
    { 
@@ -660,8 +658,8 @@ about_action ( G_GNUC_UNUSED GtkAction *action,
 static gchar *
 get_system_file (const gchar *filename)
 {
-   gchar *pathname;
-   const gchar* const *system_data_dirs;
+   gchar *pathname = NULL;
+   const gchar* const *system_data_dirs = NULL;
    
    /* Iterate over array of strings to find system data files. */
    for (system_data_dirs = g_get_system_data_dirs (); *system_data_dirs != NULL; system_data_dirs++)
