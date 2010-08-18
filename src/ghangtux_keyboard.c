@@ -32,14 +32,14 @@
 #define N_COLS 13
 #define GHANGTUX_KEYBOARD_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), GHANGTUX_KEYBOARD_TYPE, GHangtuxKeyboardPrivate))
 
-G_DEFINE_TYPE (GHangtuxKeyboard,ghangtux_keyboard, GTK_TYPE_TABLE)
+G_DEFINE_TYPE (GHangtuxKeyboard,gh_keyboard, GTK_TYPE_TABLE)
 
 struct _GHangtuxKeyboardPrivate
 {
    GtkWidget *button[N_ROWS][N_COLS];
 };
 
-static void ghangtux_keyboard_key_set_insensitive (GtkWidget *key, gpointer keyboard);
+static void gh_keyboard_key_set_insensitive (GtkWidget *key, gpointer keyboard);
 
 /* Signals. */
 enum {
@@ -51,7 +51,7 @@ static guint keyboard_signals[LAST] = { 0 };
 /* Initializes the fields of the widget's class structure, 
  * and sets up any signals for the class. */
 static void
-ghangtux_keyboard_class_init (GHangtuxKeyboardClass *klass)
+gh_keyboard_class_init (GHangtuxKeyboardClass *klass)
 {
    keyboard_signals[KEY_CLICKED] = g_signal_new (
                                        "key_clicked",
@@ -70,7 +70,7 @@ ghangtux_keyboard_class_init (GHangtuxKeyboardClass *klass)
 
 /* Initializes the object structure. */
 static void
-ghangtux_keyboard_init (GHangtuxKeyboard *keyboard)
+gh_keyboard_init (GHangtuxKeyboard *keyboard)
 {
    gint i;
    gint j;
@@ -95,7 +95,7 @@ ghangtux_keyboard_init (GHangtuxKeyboard *keyboard)
          gtk_table_attach_defaults (GTK_TABLE (keyboard), keyboard->priv->button[i][j], 
                                     j, j+1, i, i+1);
          g_signal_connect (G_OBJECT (keyboard->priv->button[i][j]), "clicked",
-                           G_CALLBACK (ghangtux_keyboard_key_set_insensitive),
+                           G_CALLBACK (gh_keyboard_key_set_insensitive),
                            (gpointer) keyboard);
 
          gtk_widget_show (keyboard->priv->button[i][j]);
@@ -106,7 +106,7 @@ ghangtux_keyboard_init (GHangtuxKeyboard *keyboard)
 
 /* Looks for a letter in the displayed sentence. */
 static void
-ghangtux_keyboard_key_set_insensitive (GtkWidget *key, gpointer keyboard)
+gh_keyboard_key_set_insensitive (GtkWidget *key, gpointer keyboard)
 {
    const gchar *key_name = NULL;
 
@@ -126,14 +126,14 @@ ghangtux_keyboard_key_set_insensitive (GtkWidget *key, gpointer keyboard)
 
 /* Function that the user calls to create the object. */
 GtkWidget*
-ghangtux_keyboard_new ()
+gh_keyboard_new ()
 {
   return GTK_WIDGET (g_object_new (GHANGTUX_KEYBOARD_TYPE, NULL));
 }
 
 /* Sets the keyboard to sensitive or not sensitive. */
 void
-ghangtux_keyboard_set_sensitive (GHangtuxKeyboard *keyboard,
+gh_keyboard_set_sensitive (GHangtuxKeyboard *keyboard,
                              gboolean sensitive)
 {
    gint i;

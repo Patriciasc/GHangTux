@@ -1,6 +1,6 @@
 /*
  * ########################################################################
- * # File: GHangtux - ghangtux_keyboard.h                                 #
+ * # File: GHangtux - ghangtux_ui.h                                       #
  * #                                                                      #
  * # Author: Patricia Santana Cruz  <patriciasc@openismus.com>            #
  * #                                                                      #
@@ -24,46 +24,23 @@
  * # along with GHangtux. If not, see <http://www.gnu.org/licenses/>.     #
  * ########################################################################
 */
+#ifndef GHANGTUX_UI_H__
+#define GHANGTUX_UI_H__
 
-#ifndef GHANGTUX_KEYBOARD_H__
-#define GHANGTUX_KEYBOARD_H__
+#include "main.h"
 
-#include <glib.h>
-#include <glib-object.h>
-#include <gtk/gtk.h>
+static const gchar GUI_FILE[]     = "ui/ghangtux.glade";
+static const gchar UI_FILE[]      = "ui/menu.ui";
+static const gchar MENU[]         = "/MainMenu";
+static const gchar TOOLBAR[]      = "/MainToolbar";
+static const gchar LOGO[]         = "icons/hicolor/200x200/apps/ghangtux.png";
+static const gchar ACTION_GROUP[] = "MainActionGroup";
 
-G_BEGIN_DECLS
+/* G_GNUC_UNUSED: for desabling warnings when 
+ * a parameter in a function is not used */
 
-#define GHANGTUX_KEYBOARD_TYPE            (gh_keyboard_get_type ())
-#define GHANGTUX_KEYBOARD(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GHANGTUX_KEYBOARD_TYPE, GHangtuxKeyboard))
-#define GHANGTUX_KEYBOARD_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GHANGTUX_KEYBOARD_TYPE, GHangtuxKeyboardClass))
-#define IS_GHANGTUX_KEYBOARD(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GHANGTUX_KEYBOARD_TYPE))
-#define IS_GHANGTUX_KEYBOARD_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GHANGTUX_KEYBOARD_TYPE))
-#define GHANGTUX_KEYBOARD_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), GHANGTUX_KEYBOARD_TYPE, GHangtuxKeyboardClass))
+void gh_ui_init(Gamewidget *gamew);
+void gh_ui_activate_radio_action (G_GNUC_UNUSED GtkRadioAction *raction,
+                             GtkRadioAction *curr_raction, gpointer data);
 
-typedef struct _GHangtuxKeyboard        GHangtuxKeyboard;
-typedef struct _GHangtuxKeyboardClass   GHangtuxKeyboardClass;
-typedef struct _GHangtuxKeyboardPrivate GHangtuxKeyboardPrivate;
-
-struct _GHangtuxKeyboard
-{
-   GtkTable parent_instance;
-   /* private */
-   GHangtuxKeyboardPrivate *priv;
-};
-
-struct _GHangtuxKeyboardClass
-{
-   GtkTableClass parent_class;
-
-   void (* key_clicked) (GHangtuxKeyboard *keyboard, const gchar key_name);
-};
-
-/* Method definitions for the user. */
-GType          gh_keyboard_get_type        (void);
-GtkWidget*     gh_keyboard_new             (void);
-void           gh_keyboard_set_sensitive   (GHangtuxKeyboard *keyboard, gboolean sensitive);
-
-G_END_DECLS
-
-#endif /* GHANGTUX_KEYBOARD_H__ */
+#endif /* GHANGTUX_UI_H__ */

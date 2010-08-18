@@ -1,6 +1,6 @@
 /*
  * ########################################################################
- * # File: GHangtux - ghangtux_keyboard.h                                 #
+ * # File: GHangtux - main.h                                              #
  * #                                                                      #
  * # Author: Patricia Santana Cruz  <patriciasc@openismus.com>            #
  * #                                                                      #
@@ -25,45 +25,44 @@
  * ########################################################################
 */
 
-#ifndef GHANGTUX_KEYBOARD_H__
-#define GHANGTUX_KEYBOARD_H__
+#ifndef MAIN_H__
+#define MAIN_H__
 
-#include <glib.h>
-#include <glib-object.h>
 #include <gtk/gtk.h>
 
-G_BEGIN_DECLS
+typedef struct _GameWidget Gamewidget;
 
-#define GHANGTUX_KEYBOARD_TYPE            (gh_keyboard_get_type ())
-#define GHANGTUX_KEYBOARD(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GHANGTUX_KEYBOARD_TYPE, GHangtuxKeyboard))
-#define GHANGTUX_KEYBOARD_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GHANGTUX_KEYBOARD_TYPE, GHangtuxKeyboardClass))
-#define IS_GHANGTUX_KEYBOARD(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GHANGTUX_KEYBOARD_TYPE))
-#define IS_GHANGTUX_KEYBOARD_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GHANGTUX_KEYBOARD_TYPE))
-#define GHANGTUX_KEYBOARD_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), GHANGTUX_KEYBOARD_TYPE, GHangtuxKeyboardClass))
-
-typedef struct _GHangtuxKeyboard        GHangtuxKeyboard;
-typedef struct _GHangtuxKeyboardClass   GHangtuxKeyboardClass;
-typedef struct _GHangtuxKeyboardPrivate GHangtuxKeyboardPrivate;
-
-struct _GHangtuxKeyboard
+/* Game widgets. */
+struct _GameWidget
 {
-   GtkTable parent_instance;
-   /* private */
-   GHangtuxKeyboardPrivate *priv;
+   GtkBuilder *builder;       /* Apps builder */
+   GtkUIManager *ui_manager;  /* UI Manager */
+   GtkWidget *window;         /* Toplevel window */
+
+   GtkWidget *vbox;           /* Vertical box */
+   GtkWidget *vbox2;          /* Vertical box 2 */
+   GtkWidget *menubar;        /* Menubar */
+
+   GtkWidget *toolbar;        /* Toolbar */
+   GtkWidget *eventbox;       /* Eventbox */
+   gchar *sentence;           /* Games's sentence */
+
+   gchar *display_sentence;   /* Displayed sentence */
+   const gchar *valid_chars;  /* Player asserted characters */
+   GtkLabel *display_label;   /* Label for display_sentence */
+
+   GtkLabel *title_label;     /* Title label */
+   GtkImage *image;           /* Displayed image */
+   GtkActionGroup *def_group; /* Default action group */
+
+   gint n_img;                /* Current image number */
+   gboolean first_game;       /* Indicates if the current game is the first */
+   GtkWidget *keyboard;       /* Keyboard */
+
+   GtkWidget *statusbar;      /* Game status bar */
+   gint scontext;             /* Game status bar's context */
+   gint theme_id;             /* Current theme's identifier */
+   GdkPixbuf *logo;           /* Application's logo */
 };
 
-struct _GHangtuxKeyboardClass
-{
-   GtkTableClass parent_class;
-
-   void (* key_clicked) (GHangtuxKeyboard *keyboard, const gchar key_name);
-};
-
-/* Method definitions for the user. */
-GType          gh_keyboard_get_type        (void);
-GtkWidget*     gh_keyboard_new             (void);
-void           gh_keyboard_set_sensitive   (GHangtuxKeyboard *keyboard, gboolean sensitive);
-
-G_END_DECLS
-
-#endif /* GHANGTUX_KEYBOARD_H__ */
+#endif /* MAIN_H__ */

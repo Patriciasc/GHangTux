@@ -37,9 +37,18 @@ ghangtux_LDADD = $(DEP_LIBS)
 SUBDIRS = po
 
 bin_PROGRAMS = ghangtux
-ghangtux_SOURCES = src/main.c \
+ghangtux_SOURCES = src/main.h \
+						 src/main.c \
                    src/ghangtux_keyboard.h \
-                   src/ghangtux_keyboard.c 
+                   src/ghangtux_keyboard.c \
+                   src/ghangtux_management.h \
+                   src/ghangtux_management.c \
+                   src/ghangtux_utils.h \
+                   src/ghangtux_utils.c \
+                   src/ghangtux_ui.h \
+                   src/ghangtux_ui.c
+                        
+                    
 
 imagesdir = $(pkgdatadir)/images
 dist_images_DATA = data/images/Tux0.png \

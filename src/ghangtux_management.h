@@ -1,6 +1,6 @@
 /*
  * ########################################################################
- * # File: GHangtux - ghangtux_keyboard.h                                 #
+ * # File: GHangtux - ghangtux_management.h                               #
  * #                                                                      #
  * # Author: Patricia Santana Cruz  <patriciasc@openismus.com>            #
  * #                                                                      #
@@ -25,45 +25,25 @@
  * ########################################################################
 */
 
-#ifndef GHANGTUX_KEYBOARD_H__
-#define GHANGTUX_KEYBOARD_H__
+#ifndef GHANGTUX_MANAGEMENT_H__
+#define GHANGTUX_MANAGEMENT_H__
 
-#include <glib.h>
-#include <glib-object.h>
-#include <gtk/gtk.h>
+static const gchar TUX_IMG_0[]      = "images/Tux0.png";
+static const gchar SENTENCE_LABEL[] = "for_sentence_label";
+static const gchar TITLE_LABEL[]    = "for_title_label";
+static const gchar WIN[]            = "main_win";
+static const gchar VBOX[]           = "vbox";
+static const gchar VBOX2[]          = "vbox2";
+static const gchar IMAGE[]          = "hangtux_area";
+static const gchar STATUSBAR[]      = "statusbar";
+static const gchar EVENTBOX[]       = "eventbox";
 
-G_BEGIN_DECLS
+static const gint NUM_IMAGES = 7;
 
-#define GHANGTUX_KEYBOARD_TYPE            (gh_keyboard_get_type ())
-#define GHANGTUX_KEYBOARD(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GHANGTUX_KEYBOARD_TYPE, GHangtuxKeyboard))
-#define GHANGTUX_KEYBOARD_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GHANGTUX_KEYBOARD_TYPE, GHangtuxKeyboardClass))
-#define IS_GHANGTUX_KEYBOARD(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GHANGTUX_KEYBOARD_TYPE))
-#define IS_GHANGTUX_KEYBOARD_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GHANGTUX_KEYBOARD_TYPE))
-#define GHANGTUX_KEYBOARD_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), GHANGTUX_KEYBOARD_TYPE, GHangtuxKeyboardClass))
+void       gh_management_set_end_game              (gpointer data, int winner);
+void       gh_management_game_init                 (Gamewidget *gamew);
+void       gh_management_set_builder               (Gamewidget *gamew);
+Gamewidget gh_management_gamew_init                ();
+void       gh_management_import_languages          ();
 
-typedef struct _GHangtuxKeyboard        GHangtuxKeyboard;
-typedef struct _GHangtuxKeyboardClass   GHangtuxKeyboardClass;
-typedef struct _GHangtuxKeyboardPrivate GHangtuxKeyboardPrivate;
-
-struct _GHangtuxKeyboard
-{
-   GtkTable parent_instance;
-   /* private */
-   GHangtuxKeyboardPrivate *priv;
-};
-
-struct _GHangtuxKeyboardClass
-{
-   GtkTableClass parent_class;
-
-   void (* key_clicked) (GHangtuxKeyboard *keyboard, const gchar key_name);
-};
-
-/* Method definitions for the user. */
-GType          gh_keyboard_get_type        (void);
-GtkWidget*     gh_keyboard_new             (void);
-void           gh_keyboard_set_sensitive   (GHangtuxKeyboard *keyboard, gboolean sensitive);
-
-G_END_DECLS
-
-#endif /* GHANGTUX_KEYBOARD_H__ */
+#endif /* GHANGTUX_MANAGEMENT_H__ */
