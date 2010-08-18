@@ -33,52 +33,63 @@
 #include <string.h>
 #include <stdlib.h>
 #include "config.h"
-#include "keyboard.h"
+#include "ghangtux_keyboard.h"
 
-#define TUX_IMG_0 "images/Tux0.png"
-#define FILMS_FILE "themes/films.txt"
-#define OBJECTS_FILE "themes/objects.txt"
-#define PERSONS_FILE "themes/persons.txt"
-#define LOGO "icons/hicolor/200x200/apps/ghangtux.png"
+static const gchar TUX_IMG_0[] = "images/Tux0.png";
+static const gchar FILMS_FILE[] = "themes/films.txt";
+static const gchar OBJECTS_FILE[] = "themes/objects.txt";
+static const gchar PERSONS_FILE[] = "themes/persons.txt";
+static const gchar LOGO[] = "icons/hicolor/200x200/apps/ghangtux.png";
 
-#define GUI_FILE "ui/ghangtux.glade"
-#define UI_FILE "ui/menu.ui"
+static const gchar GUI_FILE[] = "ui/ghangtux.glade";
+static const gchar UI_FILE[] = "ui/menu.ui";
 
-#define ACTION_GROUP "MainActionGroup"
-#define SENTENCE_LABEL "for_sentence_label"
-#define TITLE_LABEL "for_title_label"
-#define WIN "main_win"
-#define VBOX "vbox"
-#define VBOX2 "vbox2"
-#define MENU "/MainMenu"
-#define TOOLBAR "/MainToolbar"
-#define IMAGE "hangtux_area"
-#define STATUSBAR "statusbar"
-#define EVENTBOX "eventbox"
+static const gchar ACTION_GROUP[] = "MainActionGroup";
+static const gchar SENTENCE_LABEL[] = "for_sentence_label";
+static const gchar TITLE_LABEL[] = "for_title_label";
+static const gchar WIN[] = "main_win";
+static const gchar VBOX[] = "vbox";
+static const gchar VBOX2[] = "vbox2";
+static const gchar MENU[] = "/MainMenu";
+static const gchar TOOLBAR[] = "/MainToolbar";
+static const gchar IMAGE[] = "hangtux_area";
+static const gchar STATUSBAR[] = "statusbar";
+static const gchar EVENTBOX[] = "eventbox";
 
-#define MIN_RANDOM 1
-#define MAX_RANDOM 41
-#define NUM_IMAGES 7
+static const gint MIN_RANDOM = 1;
+static const gint MAX_RANDOM = 41;
+static const gint NUM_IMAGES = 7;
+
+typedef struct _GameWidget Gamewidget;
 
 /* Callbacks for signals. */
-void main_win_destroy            (GtkObject *window, gpointer data);
-void format_sentence_with_letter (Keyboard *keyboard, const gchar key_name,
-                                  gpointer data);
+/* G_MODULE_EXPORT: For windows applications to put the 
+ * callbakcs in the symbol table. */
+G_MODULE_EXPORT void main_win_destroy            (GtkObject *window, gpointer data);
+G_MODULE_EXPORT void format_sentence_with_letter (GHangtuxKeyboard *keyboard, const gchar key_name, gpointer data);
 
 /* Callbacks for actions. */
-static void new_action          (GtkAction *action, gpointer data);
-static void solve_action        (GtkAction *action, gpointer data);
-static void quit_action         (GtkAction *action, gpointer data);
-static void get_sentence_action (GtkRadioAction *raction,
-                                 GtkRadioAction *curr_raction, gpointer data);
-static void about_action        (GtkAction *action, gpointer data);
-static void extern_key_release  (GtkWidget *window, GdkEventKey *event, gpointer data);
+static void new_action            (GtkAction *action, gpointer data);
+static void solve_action          (GtkAction *action, gpointer data);
+static void quit_action           (GtkAction *action, gpointer data);
+static void activate_radio_action (GtkRadioAction *raction,
+                                   GtkRadioAction *curr_raction, gpointer data);
+static void about_action          (GtkAction *action, gpointer data);
+static void extern_key_release    (GtkWidget *window, GdkEventKey *event, gpointer data);
 
 /* Auxiliary functions. */
-static void  load_image               (const char *file_image);
-static gchar *get_system_file         (const gchar *filename);
-static void  set_end_game             (gpointer data, int winner);
-gchar  *format_text_with_markup       (const gchar *text, int type);
+static void  load_image                (const char *file_image, Gamewidget *gamew);
+static gchar *get_system_file          (const gchar *filename);
+static void  set_end_game              (gpointer data, int winner);
+static gchar *format_text_with_markup  (const gchar *text, int type);
+static void  game_init                 (Gamewidget *gamew);
+static void  set_logo                  (Gamewidget *gamew);
+static void  get_sentence              (Gamewidget *gamew);
+static void  set_builder               (Gamewidget *gamew);
+static void  ui_init                   (Gamewidget *gamew);
+static void  set_actions               (Gamewidget *gamew);
+static void  keyboard_init             (Gamewidget *gamew);
+Gamewidget   gamew_init                ();
 
 /* --------------------------------------------------------*/
 /* --------------  START: list of actions  ----------------*/
@@ -182,62 +193,46 @@ static const guint NUM_ACTIONS = G_N_ELEMENTS (actions);
 /* --------------  END: list of actions  ----------------*/
 /* --------------------------------------------------------*/
 
-typedef struct _GameWidget Gamewidget;
 
 /* Actual display sentence management. */
 struct _GameWidget
 {
-   gchar *sentence;           /* games's sentence */
-   gchar *display_sentence;   /* displayed sentence */
-   const gchar *valid_chars;  /* player asserted characters */
-   GtkLabel *display_label;   /* label for display_sentence */
-   GtkLabel *title_label;     /* title label */
-   GtkImage *image;           /* displayed image */
-   gint n_img;                /* current image number */
-   gboolean first_game;       /* indicates if the current game is the first */
-   GtkWidget *keyboard;       /* keyboard */
-   GtkWidget *statusbar;      /* game status bar */
-   gint scontext;             /* game status bar's context */
-   gint theme_id;             /* current theme's identifier */
-   GdkPixbuf *logo;            /* application's logo */
+   GtkBuilder *builder;       /* Apps builder */
+   GtkUIManager *ui_manager;  /* UI Manager */
+   GtkWidget *window;         /* Toplevel window */
+
+   GtkWidget *vbox;           /* Vertical box */
+   GtkWidget *vbox2;          /* Vertical box 2 */
+   GtkWidget *menubar;        /* Menubar */
+
+   GtkWidget *toolbar;        /* Toolbar */
+   GtkWidget *eventbox;       /* Eventbox */
+   gchar *sentence;           /* Games's sentence */
+
+   gchar *display_sentence;   /* Displayed sentence */
+   const gchar *valid_chars;  /* Player asserted characters */
+   GtkLabel *display_label;   /* Label for display_sentence */
+
+   GtkLabel *title_label;     /* Title label */
+   GtkImage *image;           /* Displayed image */
+   GtkActionGroup *def_group; /* Default action group */
+
+   gint n_img;                /* Current image number */
+   gboolean first_game;       /* Indicates if the current game is the first */
+   GtkWidget *keyboard;       /* Keyboard */
+
+   GtkWidget *statusbar;      /* Game status bar */
+   gint scontext;             /* Game status bar's context */
+   gint theme_id;             /* Current theme's identifier */
+   GdkPixbuf *logo;           /* Application's logo */
 };
 
-Gamewidget gamew;
 
 int
 main (int argc,
-     char **argv)
+     char *argv[])
 {
-   GtkBuilder *builder = NULL;
-   GtkWidget *window = NULL;
-   GtkWidget *vbox = NULL;
-   GtkWidget *vbox2 = NULL;
-   GtkWidget *menubar = NULL;
-   GtkWidget *toolbar = NULL;
-   GtkWidget *eventbox = NULL;
-   GtkActionGroup *def_group = NULL;
-   GtkUIManager *ui_manager = NULL;
-   GtkRadioAction *raction_init = NULL;
-   GError *error = NULL;
-   static gchar *sys_file = NULL;
-   GdkColor image_bg;
-
-   gamew.sentence = NULL;
-   gamew.display_sentence = NULL;
-   gamew.valid_chars = NULL;
-   gamew.display_label = NULL;
-   gamew.title_label = NULL;
-   gamew.image = NULL;
-   gamew.n_img = 0;
-   gamew.first_game = 1;
-   gamew.keyboard = NULL;
-   gamew.statusbar = NULL;
-   gamew.scontext = 0;
-   gamew.logo = NULL;
-
-   image_bg.red = 50535;
-   image_bg.green = 55535;
-   image_bg.blue = 60535;
+   Gamewidget gamew = gamew_init();
 
    gtk_init (&argc, &argv);
   
@@ -246,109 +241,18 @@ main (int argc,
    bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
    textdomain(GETTEXT_PACKAGE);
    
-   /* Setting up the builder. */
-   builder = gtk_builder_new();
+   /* Set up the builder. */
+   set_builder (&gamew);
    
-   if (!gtk_builder_add_from_file (builder, sys_file = get_system_file (GUI_FILE), &error))
-   {
-     g_message ("Building builder failed: %s\n", error->message);
-     g_error_free (error);
-     return 1;
-   }
-
-   g_free (sys_file);
-
-   window = GTK_WIDGET (gtk_builder_get_object (builder,WIN));
-   vbox = GTK_WIDGET (gtk_builder_get_object (builder, VBOX));
-   gamew.display_label = GTK_LABEL (gtk_builder_get_object (builder, SENTENCE_LABEL));
-   gamew.title_label = GTK_LABEL (gtk_builder_get_object (builder, TITLE_LABEL));
-   gamew.image = GTK_IMAGE (gtk_builder_get_object (builder, IMAGE));
-   gamew.statusbar = GTK_WIDGET (gtk_builder_get_object (builder, STATUSBAR));
-   vbox2 = GTK_WIDGET (gtk_builder_get_object (builder, VBOX2));
-   eventbox = GTK_WIDGET (gtk_builder_get_object (builder, EVENTBOX));
-   gtk_widget_modify_bg (eventbox, 0, &image_bg);
-   
-    
-   /* XXX this is not the definitive image */
-   gamew.logo = gdk_pixbuf_new_from_file (sys_file = get_system_file (LOGO), &error);
-   
-   /* Set the application logo or handle the error. */
-   if (error)
-   {
-      if (error->domain == GDK_PIXBUF_ERROR)
-         g_print ("GdkPixbufError: %s\n", error->message);
-      else if (error->domain == G_FILE_ERROR)
-         g_print ("GFileError: %s\n", error->message);
-      else
-         g_print ("An error in the unexpected domain:%d has occurred!\n", error->domain);
-
-      g_error_free (error);
-   }
-
-   g_free (sys_file);
-
-   gtk_window_set_icon (GTK_WINDOW (window), gamew.logo);
-
-   gtk_builder_connect_signals (builder,NULL);
-   g_object_unref (G_OBJECT(builder));
-
-   /* Setting up the UI manager (menu and toolbar). */ 
-   def_group = gtk_action_group_new (ACTION_GROUP);
-   gtk_action_group_set_translation_domain (def_group, GETTEXT_PACKAGE);
-   gtk_action_group_add_actions (def_group, actions, NUM_ACTIONS, NULL);
-   gtk_action_group_add_radio_actions (def_group, radio_actions, NUM_RACTIONS,
-                                       0, G_CALLBACK (get_sentence_action),  NULL);
- 
-   ui_manager = gtk_ui_manager_new ();
-   gtk_ui_manager_insert_action_group (ui_manager, def_group, 0);
-   
-   if (!gtk_ui_manager_add_ui_from_file (ui_manager, sys_file = get_system_file (UI_FILE), &error))
-   {
-      g_message ("Building menus failed: %s\n", error->message);
-      g_error_free (error);
-      return 1;
-   }
+   /* Set up application UI. */ 
+   ui_init (&gamew);
   
-   g_free (sys_file);
+   /* Preparing game with FILM theme */
+   game_init (&gamew);
 
-   gtk_window_add_accel_group (GTK_WINDOW (window), 
-                               gtk_ui_manager_get_accel_group (ui_manager));
-
-   menubar = gtk_ui_manager_get_widget (ui_manager, MENU);
-   gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, FALSE, 0);
-   gtk_box_reorder_child (GTK_BOX (vbox), menubar, 0);
-   
-   toolbar = gtk_ui_manager_get_widget (ui_manager, "/MainToolbar");
-   gtk_toolbar_set_style (GTK_TOOLBAR (toolbar), GTK_TOOLBAR_ICONS);
-   gtk_box_pack_start (GTK_BOX (vbox), toolbar, FALSE, FALSE, 0);
-   gtk_box_reorder_child (GTK_BOX (vbox), toolbar, 1);
-  
-   /* Setting up the keyboard. */
-   gamew.keyboard = keyboard_new();
-   /* Using game's keyboard */
-   g_signal_connect (gamew.keyboard, "key_clicked",
-                     G_CALLBACK (format_sentence_with_letter), NULL);
-   /* Using external keyboard */
-   g_signal_connect (window, "key-release-event", 
-                     G_CALLBACK (extern_key_release), NULL);
-   gtk_box_pack_start (GTK_BOX (vbox2), gamew.keyboard, FALSE, FALSE, 0);
-   gtk_box_reorder_child (GTK_BOX (vbox2), gamew.keyboard, 3);
-
-   gtk_widget_show_all (window);
-  
-   /* Preparing game. */
-   raction_init = gtk_radio_action_new ("init", "init", "init", "init", 0);
-   get_sentence_action(NULL,raction_init,NULL); 
-   load_image (sys_file = get_system_file(TUX_IMG_0));
-
-   g_free (sys_file);
-   g_object_unref (ui_manager);
-   g_object_unref (raction_init);
-   gamew.n_img ++;
-
-   gtk_main();
    return 0;
 } 
+
 
 /* G_GNUC_UNUSED is used up this point for desabling
  * warnings when a parameter in a function is not
@@ -368,20 +272,21 @@ main_win_destroy (G_GNUC_UNUSED GtkObject *window,
 
 /* Formats the sentence with a new letter for displaying.*/ 
 void
-format_sentence_with_letter (G_GNUC_UNUSED Keyboard *keyboard, 
+format_sentence_with_letter (G_GNUC_UNUSED  GHangtuxKeyboard *keyboard, 
                              const gchar key_name,
                              gpointer data)
 {
    guint i = 0;
-   gint valid_letter = 0;
+   gboolean valid_letter = 0;
 	gchar *markup = NULL;
    gchar *image = NULL;
-   guint length = strlen(gamew.sentence);
+   Gamewidget *gamew = (Gamewidget *)data;
+   guint length = strlen(gamew->sentence);
   
    /* Looks for the label's letter in the sentence. */
    for (i=0; i!=length; i++)
    { 
-      if (gamew.sentence[i] == key_name)
+      if (gamew->sentence[i] == key_name)
       {
           valid_letter = 1;
       }
@@ -390,32 +295,32 @@ format_sentence_with_letter (G_GNUC_UNUSED Keyboard *keyboard,
    /* Add the letter as a valid character and displays it. */
    if (valid_letter == 1)
    {
-      gamew.valid_chars = g_strconcat (gamew.valid_chars, &key_name, NULL);
-      g_free (gamew.display_sentence);
-      gamew.display_sentence = g_strdup (gamew.sentence);
-      g_strcanon ( gamew.display_sentence, gamew.valid_chars, '_');
-      markup = format_text_with_markup (gamew.display_sentence, 0); 
-      gtk_label_set_markup (GTK_LABEL (gamew.display_label), markup);
+      gamew->valid_chars = g_strconcat (gamew->valid_chars, &key_name, NULL);
+      g_free (gamew->display_sentence);
+      gamew->display_sentence = g_strdup (gamew->sentence);
+      g_strcanon ( gamew->display_sentence, gamew->valid_chars, '_');
+      markup = format_text_with_markup (gamew->display_sentence, 0); 
+      gtk_label_set_markup (GTK_LABEL (gamew->display_label), markup);
       
       /* Player wins. */
-      if (g_strcmp0(gamew.sentence, gamew.display_sentence) == 0)
+      if (g_strcmp0(gamew->sentence, gamew->display_sentence) == 0)
       {
-         set_end_game(data, TRUE);
+         set_end_game(gamew, TRUE);
       }
    }
    else
    { 
       /* Loads a new image of the Hangtux. */ 
-      if (gamew.n_img < NUM_IMAGES) 
+      if (gamew->n_img < NUM_IMAGES) 
       {
-         image = g_strdup_printf("images/Tux%i.png",gamew.n_img);
-         load_image (get_system_file(image));
-         gamew.n_img++;
+         image = g_strdup_printf("images/Tux%i.png",gamew->n_img);
+         load_image (get_system_file(image), gamew);
+         gamew->n_img++;
       }
       /* Player loses. */
       else
       {
-         set_end_game(data,FALSE);
+         set_end_game(gamew,FALSE);
       }
    }
    
@@ -426,10 +331,12 @@ format_sentence_with_letter (G_GNUC_UNUSED Keyboard *keyboard,
 static void
 extern_key_release  (G_GNUC_UNUSED GtkWidget *window, 
                      GdkEventKey *event,
-                     G_GNUC_UNUSED gpointer data)
+                     gpointer data)
 {
+   Gamewidget *gamew = (Gamewidget *)data;
    gchar *up_char = g_ascii_strup(event->string,-1);
-   format_sentence_with_letter (KEYBOARD (gamew.keyboard), *up_char, NULL);
+
+   format_sentence_with_letter (GHANGTUX_KEYBOARD (gamew->keyboard), *up_char, gamew);
 }
 
 /******************************
@@ -440,36 +347,15 @@ extern_key_release  (G_GNUC_UNUSED GtkWidget *window,
  * START: Callbacks for actions *
  * ******************************/
 
-/* Loads a game for the same current theme. */
-static void
+/* Loads a new game for the same current theme. */
+static void 
 new_action (G_GNUC_UNUSED GtkAction *action,
-            G_GNUC_UNUSED gpointer data)
+             gpointer data)
 {
-   GtkRadioAction *raction_init = NULL;
-
-   switch (gamew.theme_id)
-   {
-      case 0:
-         raction_init = gtk_radio_action_new ("init", "init", "init", "init", 0);
-         break;
-
-      case 1:
-         raction_init = gtk_radio_action_new ("init", "init", "init", "init", 1);
-         break;
-
-      case 2:
-         raction_init = gtk_radio_action_new ("init", "init", "init", "init", 2);
-         break;
-
-      default:
-         g_print (" Problem loading new game for same theme\n");
-         break;
-   }
-   
-   get_sentence_action(NULL,raction_init,NULL); 
-   
-   g_object_unref (raction_init);
+   Gamewidget *gamew = (Gamewidget *)data;
+   get_sentence (gamew);
 }
+
 
 /* Displays the solution for the current game. */
 static void
@@ -482,168 +368,46 @@ solve_action ( G_GNUC_UNUSED GtkAction *action,
 /* Quits the application from the menu. */
 static void
 quit_action (G_GNUC_UNUSED GtkAction *action,
-             G_GNUC_UNUSED gpointer data)
+             gpointer data)
 {
-   main_win_destroy (NULL,NULL);
+   Gamewidget *gamew = (Gamewidget *)data;
+   main_win_destroy (GTK_OBJECT (gamew->window), NULL);
 }
 
-/* Selects a random sentence or word from the game files. */
+/* Activates a radio action from the menu. */
 static void
-get_sentence_action ( G_GNUC_UNUSED GtkRadioAction *raction,
-                     GtkRadioAction *curr_raction,
-                     gpointer data)
+activate_radio_action ( G_GNUC_UNUSED GtkRadioAction *raction,
+                        GtkRadioAction *curr_raction,
+                        gpointer data)
 {
-   GFile *file = NULL;
-   GError *error = NULL;
-   GFileInputStream *fstream = NULL; 
-   GDataInputStream *stream = NULL;
-   static gchar *sys_file = NULL;
-   gchar *markup = NULL;
-   gsize length = 0;
-   gint random = 0;
-
-   /* Not first game => Reset values and prepares new game. */
-   if (!gamew.first_game)
-   {
-      keyboard_set_sensitive (KEYBOARD (gamew.keyboard), TRUE);
-      gamew.valid_chars = NULL;
-      load_image(sys_file = get_system_file (TUX_IMG_0));
-      gamew.n_img = 1;
-   }
- 
-   g_free (sys_file);   
-
-   /* Status bar context. */
-   gamew.scontext = gtk_statusbar_get_context_id (
-                    GTK_STATUSBAR (gamew.statusbar),"Statusbar");
-
-   /* Select the file. */
-   switch (gtk_radio_action_get_current_value (curr_raction))
-   {
-      case 0:
-         gamew.theme_id = 0;
-         markup = format_text_with_markup (_("Guess the FILM by typing letters"), 1); 
-         file = g_file_new_for_path (sys_file = get_system_file(FILMS_FILE));
-         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), _("Playing theme: Films"));
-         break;
-
-      case 1:
-         gamew.theme_id = 1;
-         markup = format_text_with_markup (_("Guess the OBJECT by typing letters"), 1); 
-         file = g_file_new_for_path (sys_file = get_system_file (OBJECTS_FILE));
-         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), _("Playing theme: Objects"));
-         break;
-
-      case 2:
-         gamew.theme_id = 2;
-         markup = format_text_with_markup (_("Guess the PERSON by typing letters"), 1); 
-         file = g_file_new_for_path (sys_file = get_system_file(PERSONS_FILE));
-         gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), GPOINTER_TO_INT (data), _("Playing theme: Persons"));
-         break;
-
-      default:
-         g_print ("Creating GFIle failed\n");
-   }
-   
-   /* Sets label with markup. */ 
-   gtk_label_set_markup (GTK_LABEL (gamew.title_label), markup);
-
-   if (!(fstream = g_file_read (file, NULL, &error)))
-   {
-      g_message ("Creating file stream error: %s", error->message);
-      g_error_free (error);
-   }
-   
-   g_free (markup);
-
-   stream = g_data_input_stream_new (G_INPUT_STREAM(fstream));
-
-   /* Select a random sentence from the file. */
-   random = g_random_int_range (MIN_RANDOM, MAX_RANDOM);
-   
-   while (((gamew.sentence = g_data_input_stream_read_line (stream, &length, NULL, 
-            &error)) != NULL) && (random != 0))
-   {
-      if (error)
-      {
-         g_message ("Building menus failed: %s\n", error->message);
-         g_error_free (error);
-      }
-      else
-      {
-         random--;
-         g_free (gamew.sentence);
-      }
-   }
-   
-   /* Format the sentence for displaying the first time. */
-   g_free (gamew.display_sentence);
-   gamew.display_sentence = g_strdup (gamew.sentence);
-   gamew.valid_chars = " ";
-   g_strcanon ( gamew.display_sentence, gamew.valid_chars, '_');
-   markup = format_text_with_markup (gamew.display_sentence, 0); 
-   gtk_label_set_markup (GTK_LABEL (gamew.display_label), markup);
-   
-   g_object_unref (file);
-   g_object_unref (stream);
-   g_object_unref (fstream);
-   g_free (sys_file);
-   g_free (markup);
+   Gamewidget *gamew = (Gamewidget *)data;
+    
+   /* Sets the current theme */
+   gamew->theme_id = gtk_radio_action_get_current_value (curr_raction);
+   get_sentence (gamew);
 }
 
+/* XXX Still does not work */
 /* Shows an about dialog from the application. */
 static void
 about_action ( G_GNUC_UNUSED GtkAction *action,
-               G_GNUC_UNUSED gpointer data){
+               gpointer data)
+{
+   Gamewidget *gamew = (Gamewidget *)data;
 
-  GtkWidget *dialog;
-
-  const gchar *authors[] = {
-    "Patricia Santana Cruz", 
-    NULL
-  };
-
-  const gchar *documenters[] = {
-    "Patricia Santana Cruz",
-    NULL
-  };
-  
-  const gchar *art_work[] = {
-     "Tux images Copyright Wikimedia:\nhttp://commons.wikimedia.org/wiki/File:Tux-G2.png. Jan Vansteenkiste.",
-     NULL
-  };
-     
-  dialog = gtk_about_dialog_new ();
-  
-  /* Set logo. */
-  gtk_about_dialog_set_logo (GTK_ABOUT_DIALOG (dialog), gamew.logo);
-
-  /* Set application data that will be displayed in the main dialog. */
-  gtk_about_dialog_set_program_name (GTK_ABOUT_DIALOG (dialog), "GHangTux");
-  gtk_about_dialog_set_version (GTK_ABOUT_DIALOG (dialog), "1.1");
-  gtk_about_dialog_set_copyright (GTK_ABOUT_DIALOG (dialog), 
-                                  " Copyright (C) 2010 Openismus GmbH");
-  gtk_about_dialog_set_comments (GTK_ABOUT_DIALOG (dialog), 
-                                 _("GHangTux is a variation of the popular Hangman game."));
-
-  /* XXX Need to load the file with the text here */
-  gtk_about_dialog_set_license (GTK_ABOUT_DIALOG (dialog), 
-                                "Free: (TODO: look for the right text).");
-  gtk_about_dialog_set_website (GTK_ABOUT_DIALOG (dialog), 
-                                "http://github.com/Patriciasc/GHangTux");
-  gtk_about_dialog_set_website_label (GTK_ABOUT_DIALOG (dialog), 
-                                      "http://github.com/Patriciasc/GHangTux");
-
-  gtk_about_dialog_set_authors (GTK_ABOUT_DIALOG (dialog), authors);
-  gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG (dialog), documenters);
-  gtk_about_dialog_set_translator_credits (GTK_ABOUT_DIALOG (dialog), 
-                                           "Patricia Santana Cruz");
-  gtk_about_dialog_set_artists (GTK_ABOUT_DIALOG (dialog), art_work); 
-
-  g_object_unref (gamew.logo);
-
-  gtk_dialog_run (GTK_DIALOG (dialog));
-  gtk_widget_destroy (dialog);
+   gtk_show_about_dialog (GTK_WINDOW (gamew->window),
+   "authors", "Patricia Santana Cruz",
+   "program-name", "GHangtux",
+   "version", "1.1",
+   "copyright", "Copyright (C) 2010 Openismus GmbH",
+   "translator-credits", "Patricia Santana Cruz",
+   "comments", "GHangTux is a variation of the popular Hangman game."
+   "license", "Free: (TODO: look for the right text).",
+   "website", "http://github.com/Patriciasc/GHangTux", 
+   "website-label", "http://github.com/Patriciasc/GHangTux",
+   "documenters", "Patricia Santana Cruz",
+   "artists", "Tux images Copyright Wikimedia:\nhttp://commons.wikimedia.org/wiki/File:Tux-G2.png. Jan Vansteenkiste.",
+   NULL);
 }
 
 /******************************
@@ -681,26 +445,28 @@ get_system_file (const gchar *filename)
 
 /* Loads an image for the GtkImage central area. */
 static void
-load_image (const char *file_image)
+load_image (const char *file_image, Gamewidget *gamew)
 {
    GdkPixbuf *tux_image = NULL;
    GError *error = NULL;
+   gint result = 0;
    
    tux_image = gdk_pixbuf_new_from_file (file_image, &error);
 
    if (error)
    {
       if (error->domain == GDK_PIXBUF_ERROR)
-         g_print ("GdkPixbufError: %s\n", error->message);
+         g_critical ("GdkPixbufError: %s\n", error->message);
       else if (error->domain == G_FILE_ERROR)
-         g_print ("GFileError: %s\n", error->message);
+         g_critical ("GFileError: %s\n", error->message);
       else
-         g_print ("An error in the unexpected domain:%d has occurred!\n", error->domain);
+         g_critical ("An error in the unexpected domain:%d has occurred!\n", error->domain);
  
       g_error_free (error);
+      result = 1;
    }
    
-   gtk_image_set_from_pixbuf (gamew.image, tux_image); 
+   gtk_image_set_from_pixbuf (gamew->image, tux_image); 
    g_object_unref (G_OBJECT (tux_image));
 }
 
@@ -708,46 +474,47 @@ load_image (const char *file_image)
 static void
 set_end_game (gpointer data, int winner)
 {
+   Gamewidget *gamew = (Gamewidget *)data;
    static gchar *sys_file = NULL;
    gchar *markup = NULL;
    
    /* Shows solution. */
-   markup = format_text_with_markup (gamew.sentence, 0); 
-   gtk_label_set_markup (GTK_LABEL (gamew.display_label), markup);
+   markup = format_text_with_markup (gamew->sentence, 0); 
+   gtk_label_set_markup (GTK_LABEL (gamew->display_label), markup);
    g_free (markup);
        
    /* Change status bar state. */
-   gamew.scontext = gtk_statusbar_get_context_id (GTK_STATUSBAR (gamew.statusbar),
+   gamew->scontext = gtk_statusbar_get_context_id (GTK_STATUSBAR (gamew->statusbar),
                                                   "Statusbar");
    if (winner == 0)
    {
-      load_image (sys_file = get_system_file("images/Tux7.png"));
-      gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), 
-                          GPOINTER_TO_INT (data), _("End of game. Try again!"));
+      load_image (sys_file = get_system_file("images/Tux7.png"), gamew);
+      gtk_statusbar_push (GTK_STATUSBAR (gamew->statusbar), 
+                          GPOINTER_TO_INT (gamew), _("End of game. Try again!"));
    }
    else if (winner == 1)
    {
-      load_image (sys_file = get_system_file("images/Tux8.png"));
-      gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), 
-                          GPOINTER_TO_INT (data), _("Congratulations!"));
+      load_image (sys_file = get_system_file("images/Tux8.png"), gamew);
+      gtk_statusbar_push (GTK_STATUSBAR (gamew->statusbar), 
+                          GPOINTER_TO_INT (gamew), _("Congratulations!"));
    }
    else
    {
-      load_image (sys_file = get_system_file("images/Tux7.png"));
-      gtk_statusbar_push (GTK_STATUSBAR (gamew.statusbar), 
-                          GPOINTER_TO_INT (data), _("Solution"));
+      load_image (sys_file = get_system_file("images/Tux7.png"), gamew);
+      gtk_statusbar_push (GTK_STATUSBAR (gamew->statusbar), 
+                          GPOINTER_TO_INT (gamew), _("Solution"));
    }
 
    /* Set title label */
-   gtk_label_set_text (gamew.title_label, " "); 
+   gtk_label_set_text (gamew->title_label, " "); 
 
    /* Desable the use of the keys. */
-   keyboard_set_sensitive (KEYBOARD (gamew.keyboard), FALSE);
-   gamew.first_game = 0;
+   ghangtux_keyboard_set_sensitive (GHANGTUX_KEYBOARD (gamew->keyboard), FALSE);
+   gamew->first_game = FALSE;
 }
 
 /* Formats the text with a markup before displaying it. */ 
-gchar *
+static gchar *
 format_text_with_markup (const gchar *text, int type)
 {
    gchar *markup = NULL;
@@ -761,12 +528,300 @@ format_text_with_markup (const gchar *text, int type)
          markup = g_strdup_printf("<span size=\"small\">%s</span>", text);
          break;
       default:
-         g_print ("Problem setting markups\n");
+         g_critical ("Problem setting markups\n");
    }
 
    return markup;
 }
 
+/* Initializes game the first time. */
+static void
+game_init (Gamewidget *gamew)
+{
+   GtkAction *action = NULL;
+   static gchar *init_image_path = NULL;
+
+   action = gtk_action_group_get_action (gamew->def_group, "FilmsThemesMenuAction");
+
+   if (!action)
+   {
+      g_critical ("Problem loading action for initializing game\n");
+   }
+
+   /* Activates "Film" radio action in the menu. */
+   activate_radio_action (NULL, GTK_RADIO_ACTION (action), gamew);
+
+   /* Load initial tux image. */
+   init_image_path = get_system_file(TUX_IMG_0);
+   load_image (init_image_path, gamew);
+   gamew->n_img ++;
+
+   /* Free memory and unref GObjects. */
+   g_free (init_image_path);
+   g_object_unref (gamew->ui_manager);
+
+   gtk_main();
+}
+
+/* Load and set application logo. */
+static void 
+set_logo (Gamewidget *gamew)
+{
+   static gchar *logo_path = NULL;
+   GError *error = NULL;
+
+   /* XXX This is not the definitive image. */
+   /* Looks for the logo in the installation path */
+   logo_path = get_system_file (LOGO);
+   gamew->logo = gdk_pixbuf_new_from_file (logo_path, &error);
+   g_free (logo_path);
+   
+   /* Handle the error if there was one. */
+   if (error)
+   {
+      if (error->domain == GDK_PIXBUF_ERROR)
+         g_warning ("GdkPixbufError: %s\n", error->message);
+      else if (error->domain == G_FILE_ERROR)
+         g_warning ("GFileError: %s\n", error->message);
+      else
+         g_warning ("An error in the unexpected domain:%d has occurred!\n", error->domain);
+
+      g_error_free (error);
+   }
+   
+   /* Set application logo. */
+   gtk_window_set_icon (GTK_WINDOW (gamew->window), gamew->logo);
+}
+
+/* Selects a random sentence or word from the game files. */
+static void
+get_sentence (Gamewidget *gamew)
+{
+   GFile *file = NULL;
+   GError *error = NULL;
+   GFileInputStream *fstream = NULL; 
+   GDataInputStream *stream = NULL;
+   static gchar *sys_file = NULL;
+   gchar *markup = NULL;
+   gsize length = 0;
+   gint random = 0;
+   
+   ghangtux_keyboard_set_sensitive (GHANGTUX_KEYBOARD (gamew->keyboard), TRUE);
+   /* Not first game => Reset values and prepares new game. */
+   if (!gamew->first_game)
+   {
+      gamew->valid_chars = NULL;
+      load_image(sys_file = get_system_file (TUX_IMG_0), gamew);
+      gamew->n_img = 1;
+      g_free (sys_file);   
+   }
+
+   /* Status bar context. */
+   gamew->scontext = gtk_statusbar_get_context_id (
+                    GTK_STATUSBAR (gamew->statusbar),"Statusbar");
+
+   /* Select the file. */
+   switch (gamew->theme_id)
+   {
+      case 0:
+         markup = format_text_with_markup (_("Guess the FILM by typing letters"), 1); 
+         file = g_file_new_for_path (sys_file = get_system_file(FILMS_FILE));
+         gtk_statusbar_push (GTK_STATUSBAR (gamew->statusbar), GPOINTER_TO_INT (gamew), _("Playing theme: Films"));
+         break;
+
+      case 1:
+         markup = format_text_with_markup (_("Guess the OBJECT by typing letters"), 1); 
+         file = g_file_new_for_path (sys_file = get_system_file (OBJECTS_FILE));
+         gtk_statusbar_push (GTK_STATUSBAR (gamew->statusbar), GPOINTER_TO_INT (gamew), _("Playing theme: Objects"));
+         break;
+
+      case 2:
+         markup = format_text_with_markup (_("Guess the PERSON by typing letters"), 1); 
+         file = g_file_new_for_path (sys_file = get_system_file(PERSONS_FILE));
+         gtk_statusbar_push (GTK_STATUSBAR (gamew->statusbar), GPOINTER_TO_INT (gamew), _("Playing theme: Persons"));
+         break;
+
+      default:
+         g_critical ("Creating GFIle failed\n");
+   }
+  
+   /* Sets label with markup. */ 
+   gtk_label_set_markup (GTK_LABEL (gamew->title_label), markup);
+
+   if (!(fstream = g_file_read (file, NULL, &error)))
+   {
+      g_critical ("Creating file stream error: %s", error->message);
+      g_error_free (error);
+   }
+   
+   g_free (markup);
+
+   stream = g_data_input_stream_new (G_INPUT_STREAM(fstream));
+
+   /* Select a random sentence from the file. */
+   random = g_random_int_range (MIN_RANDOM, MAX_RANDOM);
+   
+   while (((gamew->sentence = g_data_input_stream_read_line (stream, &length, NULL, 
+            &error)) != NULL) && (random != 0))
+   {
+      if (error)
+      {
+         g_critical ("Reading file error: %s\n", error->message);
+         g_error_free (error);
+      }
+      else
+      {
+         random--;
+         g_free (gamew->sentence);
+      }
+   }
+   
+   /* Format the sentence for displaying the first time. */
+   g_free (gamew->display_sentence);
+   gamew->display_sentence = g_strdup (gamew->sentence);
+   gamew->valid_chars = " ";
+   g_strcanon ( gamew->display_sentence, gamew->valid_chars, '_');
+   markup = format_text_with_markup (gamew->display_sentence, 0); 
+   gtk_label_set_markup (GTK_LABEL (gamew->display_label), markup);
+   
+   g_object_unref (file);
+   g_object_unref (stream);
+   g_object_unref (fstream);
+   g_free (sys_file);
+   g_free (markup);
+}
+
+/* Set up GtkBuilder. */
+static void
+set_builder (Gamewidget *gamew)
+{
+   static gchar *glade_file = NULL;
+   GError *error = NULL;
+   GdkColor image_bg = {0, 50535, 55535, 60535};
+
+   /* Setting up the builder. */
+   gamew->builder = gtk_builder_new();
+  
+   /* Load glade file. */
+   glade_file = get_system_file (GUI_FILE);
+   if (!gtk_builder_add_from_file (gamew->builder, glade_file, &error))
+   {
+     g_critical ("Building builder failed: %s\n", error->message);
+     g_error_free (error);
+     g_free (glade_file);
+   }
+   g_free (glade_file);
+
+   /* Load game widgets. */
+   gamew->window = GTK_WIDGET (gtk_builder_get_object (gamew->builder,WIN));
+   gamew->vbox = GTK_WIDGET (gtk_builder_get_object (gamew->builder, VBOX));
+   gamew->display_label = GTK_LABEL (gtk_builder_get_object (gamew->builder, SENTENCE_LABEL));
+   gamew->title_label = GTK_LABEL (gtk_builder_get_object (gamew->builder, TITLE_LABEL));
+   gamew->image = GTK_IMAGE (gtk_builder_get_object (gamew->builder, IMAGE));
+   gamew->statusbar = GTK_WIDGET (gtk_builder_get_object (gamew->builder, STATUSBAR));
+   gamew->vbox2 = GTK_WIDGET (gtk_builder_get_object (gamew->builder, VBOX2));
+   gamew->eventbox = GTK_WIDGET (gtk_builder_get_object (gamew->builder, EVENTBOX));
+   gtk_widget_modify_bg (gamew->eventbox, 0, &image_bg);
+
+   gtk_builder_connect_signals (gamew->builder,NULL);
+   g_object_unref (G_OBJECT(gamew->builder));
+}
+
+/* Define action group and set up actions. */
+static void
+set_actions (Gamewidget *gamew)
+{
+   gamew->def_group = gtk_action_group_new (ACTION_GROUP);
+   gtk_action_group_set_translation_domain (gamew->def_group, GETTEXT_PACKAGE);
+   gtk_action_group_add_actions (gamew->def_group, actions, NUM_ACTIONS, gamew);
+   gtk_action_group_add_radio_actions (gamew->def_group, radio_actions, NUM_RACTIONS,
+                                       0, G_CALLBACK (activate_radio_action),  gamew);
+}
+
+/* Initialize UI manager: menu and toolbar. */
+static void
+ui_manager_init (Gamewidget *gamew)
+{
+   GError *error = NULL;   
+   static gchar *ui_path = NULL;
+
+   /* Define action group and set up actions. */
+   set_actions (gamew);  
+
+   /* Set up UI manager */
+   gamew->ui_manager = gtk_ui_manager_new ();
+   gtk_ui_manager_insert_action_group (gamew->ui_manager, gamew->def_group, 0);
+   
+   ui_path = get_system_file (UI_FILE);
+   if (!gtk_ui_manager_add_ui_from_file (gamew->ui_manager, ui_path , &error))
+   {
+      g_critical ("Building menus failed: %s\n", error->message);
+      g_error_free (error);
+   }
+   g_free (ui_path);
+
+   gtk_window_add_accel_group (GTK_WINDOW (gamew->window), 
+                               gtk_ui_manager_get_accel_group (gamew->ui_manager));
+   
+   /* Load menubar. */
+   gamew->menubar = gtk_ui_manager_get_widget (gamew->ui_manager, MENU);
+   gtk_box_pack_start (GTK_BOX (gamew->vbox), gamew->menubar, FALSE, FALSE, 0);
+   gtk_box_reorder_child (GTK_BOX (gamew->vbox), gamew->menubar, 0);
+   
+   /*Load toolbar. */
+   gamew->toolbar = gtk_ui_manager_get_widget (gamew->ui_manager, TOOLBAR);
+   gtk_toolbar_set_style (GTK_TOOLBAR (gamew->toolbar), GTK_TOOLBAR_ICONS);
+   gtk_box_pack_start (GTK_BOX (gamew->vbox), gamew->toolbar, FALSE, FALSE, 0);
+   gtk_box_reorder_child (GTK_BOX (gamew->vbox), gamew->toolbar, 1);
+}
+
+static void
+keyboard_init (Gamewidget *gamew)
+{
+   gamew->keyboard = ghangtux_keyboard_new();
+
+   /* Using game's keyboard */
+   g_signal_connect (gamew->keyboard, "key_clicked",
+                     G_CALLBACK (format_sentence_with_letter), gamew);
+
+   /* Using external keyboard */
+   g_signal_connect (gamew->window, "key-release-event", 
+                     G_CALLBACK (extern_key_release), gamew);
+
+   gtk_box_pack_start (GTK_BOX (gamew->vbox2), gamew->keyboard, FALSE, FALSE, 0);
+   gtk_box_reorder_child (GTK_BOX (gamew->vbox2), gamew->keyboard, 3);
+}
+
+/* Set up UI. */
+static void 
+ui_init (Gamewidget *gamew)
+{
+   /* Load and set application logo. */
+   set_logo (gamew);
+
+   /* Set up UI manager: Actions, Menubar and Toolbar */
+   ui_manager_init (gamew);
+  
+   /* Setting up the keyboard. */
+   keyboard_init (gamew);
+
+   /* Show game. */
+   gtk_widget_show_all (gamew->window);
+}
+
+/* Initialize game's widgets. */
+Gamewidget
+gamew_init ()
+{
+   Gamewidget gamew ={ NULL, NULL, NULL, 
+                        NULL, NULL, NULL, 
+                        NULL, NULL, NULL,
+                        NULL, NULL, NULL,
+                        NULL, NULL, NULL,
+                        0,    TRUE, NULL,
+                        NULL, 0, 0, NULL};
+  return gamew;
+}
 /****************************
  * END: Auxiliary functions *
  * **************************/

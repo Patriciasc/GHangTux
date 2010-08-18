@@ -38,8 +38,8 @@ SUBDIRS = po
 
 bin_PROGRAMS = ghangtux
 ghangtux_SOURCES = src/main.c \
-                   src/keyboard.h \
-                   src/keyboard.c 
+                   src/ghangtux_keyboard.h \
+                   src/ghangtux_keyboard.c 
 
 imagesdir = $(pkgdatadir)/images
 dist_images_DATA = data/images/Tux0.png \
