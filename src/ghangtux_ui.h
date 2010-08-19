@@ -36,6 +36,12 @@ static const gchar TOOLBAR[]      = "/MainToolbar";
 static const gchar LOGO[]         = "icons/hicolor/200x200/apps/ghangtux.png";
 static const gchar ACTION_GROUP[] = "MainActionGroup";
 
+typedef enum {
+  GAME_WON, /* Player won the game. */
+  GAME_LOST, /* Player lost the game. */
+  GAME_SOLUTION /* Player asked to see the solution of the game. */
+} GameEndCondition;
+
 /* G_GNUC_UNUSED: for desabling warnings when 
  * a parameter in a function is not used */
 

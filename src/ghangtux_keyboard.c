@@ -138,6 +138,9 @@ gh_keyboard_set_sensitive (GHangtuxKeyboard *keyboard,
 {
    gint i;
    gint j;
+ 
+   g_return_if_fail (IS_GHANGTUX_KEYBOARD (keyboard));
+
    keyboard->priv = GHANGTUX_KEYBOARD_GET_PRIVATE(keyboard);
 
    for (i=0; i<N_ROWS; i++)

@@ -64,20 +64,16 @@ gh_management_game_init (Gamewidget *gamew)
 Gamewidget
 gh_management_gamew_init ()
 {
-   Gamewidget gamew ={ NULL, NULL, NULL,  /* Builder,          UI Manager,     Toplevel window */ 
-                       NULL, NULL, NULL,  /* Vertical box,     Vertical Box 2, Menubar */
-                       NULL, NULL, NULL,  /* Toolbar,          Eventbox,       Game's sentence */ 
-                       NULL, NULL, NULL,  /* Display sentence, Asserted chars, Display label   */
-                       NULL, NULL, NULL,  /* Title label,      Display image,  Action group */
-                       0,    NULL, NULL,  /* Current image,    Keyboard,       Status bar */
-                       0,    0,    NULL}; /* Context,          Current theme,  Logo */
+  Gamewidget gamew = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                       NULL, NULL, NULL, NULL, NULL, NULL, 0,    NULL, NULL,
+                       0,    0,    NULL};
   return gamew;
 }
 
 /* Sets up the end of the game. */
 void
 gh_management_set_end_game (gpointer data,
-                            int winner)
+                            GameEndCondition winner)
 {
    Gamewidget *gamew = (Gamewidget *)data;
    static gchar *file_path = NULL;
@@ -87,7 +83,7 @@ gh_management_set_end_game (gpointer data,
    gh_keyboard_set_sensitive (GHANGTUX_KEYBOARD (gamew->keyboard), FALSE);
  
    /* Set title label. */
-   gtk_label_set_text (gamew->title_label, " "); 
+   gtk_label_set_text (gamew->title_label, "");
 
    /* Shows solution. */
    markup = gh_utils_format_text_with_markup (gamew->sentence, 0); 
@@ -97,23 +93,26 @@ gh_management_set_end_game (gpointer data,
    /* Change status bar state. */
    gamew->scontext = gtk_statusbar_get_context_id (GTK_STATUSBAR (gamew->statusbar),
                                                   "Statusbar");
-   if (winner == 0)
+   switch(winner)
    {
-      gh_utils_load_image (file_path = gh_utils_get_system_file("images/Tux7.png"), gamew);
-      gtk_statusbar_push (GTK_STATUSBAR (gamew->statusbar), 
-                          GPOINTER_TO_INT (gamew), _("End of game. Try again!"));
-   }
-   else if (winner == 1)
-   {
-      gh_utils_load_image (file_path = gh_utils_get_system_file("images/Tux8.png"), gamew);
-      gtk_statusbar_push (GTK_STATUSBAR (gamew->statusbar), 
-                          GPOINTER_TO_INT (gamew), _("Congratulations!"));
-   }
-   else
-   {
-      gh_utils_load_image (file_path = gh_utils_get_system_file("images/Tux7.png"), gamew);
-      gtk_statusbar_push (GTK_STATUSBAR (gamew->statusbar), 
-                          GPOINTER_TO_INT (gamew), _("Solution"));
+      case GAME_WON:
+      {
+         gh_utils_load_image (file_path = gh_utils_get_system_file("images/Tux7.png"), gamew);
+         gtk_statusbar_push (GTK_STATUSBAR (gamew->statusbar),
+                             GPOINTER_TO_INT (gamew), _("End of game. Try again!"));
+      }
+      case GAME_LOST:
+      {
+         gh_utils_load_image (file_path = gh_utils_get_system_file("images/Tux8.png"), gamew);
+         gtk_statusbar_push (GTK_STATUSBAR (gamew->statusbar),
+                             GPOINTER_TO_INT (gamew), _("Congratulations!"));
+      }
+      case GAME_SOLUTION:
+      {
+         gh_utils_load_image (file_path = gh_utils_get_system_file("images/Tux7.png"), gamew);
+         gtk_statusbar_push (GTK_STATUSBAR (gamew->statusbar),
+                             GPOINTER_TO_INT (gamew), _("Solution"));
+      }
    }
    g_free (file_path);
 }
@@ -131,12 +130,20 @@ gh_management_set_builder (Gamewidget *gamew)
   
    /* Load glade file. */
    glade_file = gh_utils_get_system_file (GUI_FILE);
-   if (!gtk_builder_add_from_file (gamew->builder, glade_file, &error))
+   if(glade_file)
    {
-     g_critical ("Building builder failed: %s\n", error->message);
-     g_error_free (error);
+      if (!gtk_builder_add_from_file (gamew->builder, glade_file, &error))
+      {
+        g_critical ("Building builder failed: %s\n", error->message);
+        g_error_free (error);
+      }
+      g_free (glade_file);
    }
-   g_free (glade_file);
+   else
+   {
+      g_error("Unable to load GtkBuilder UI file: %s", GUI_FILE);
+      return;
+   }
 
    /* Load game widgets. */
    gamew->window = GTK_WIDGET (gtk_builder_get_object (gamew->builder,WIN));

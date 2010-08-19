@@ -28,6 +28,8 @@
 #ifndef GHANGTUX_MANAGEMENT_H__
 #define GHANGTUX_MANAGEMENT_H__
 
+#include "ghangtux_ui.h"
+
 static const gchar TUX_IMG_0[]      = "images/Tux0.png";
 static const gchar SENTENCE_LABEL[] = "for_sentence_label";
 static const gchar TITLE_LABEL[]    = "for_title_label";
@@ -41,7 +43,7 @@ static const gint NUM_IMAGES        = 7;
 
 void        gh_management_game_init       (Gamewidget *gamew);
 Gamewidget  gh_management_gamew_init      ();
-void        gh_management_set_end_game    (gpointer data, int winner);
+void        gh_management_set_end_game    (gpointer data, GameEndCondition winner);
 void        gh_management_set_builder     (Gamewidget *gamew);
 void        gh_management_new_game_start  (Gamewidget *gamew);
 

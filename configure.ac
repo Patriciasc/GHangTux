@@ -42,9 +42,10 @@ AC_SUBST([PROGRAMNAME_LOCALEDIR], [${datadir}/locale])
 AM_PROG_CC_C_O
 PKG_CHECK_MODULES([DEP], [gtk+-2.0 >= 2.20 gio-2.0 >= 2.24 glib-2.0 >= 2.24 gmodule-export-2.0])
 
+DISABLE_SINGLE_INCLUDES="-DG_DISABLE_SINGLE_INCLUDES -DGDK_PIXBUF_DISABLE_SINGLE_INCLUDES -DGTK_DISABLE_SINGLE_INCLUDES"
 DK_ARG_ENABLE_WARNINGS([GHANGTUX_WARNING_FLAGS],
-                       [-Wall -w1],
-                       [-pedantic -Wall -Wextra -w1],
+                       [-Wall -w1 $DISABLE_SINGLE_INCLUDES],
+                       [-pedantic -Wall -Wextra -w1 $DISABLE_SINGLE_INCLUDES],
                        [GTK GDK GDK_PIXBUF G])
 
 AC_CONFIG_FILES([Makefile po/Makefile.in])
