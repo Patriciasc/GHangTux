@@ -28,8 +28,6 @@
 #ifndef GHANGTUX_UTILS_H__
 #define GHANGTUX_UTILS_H__
 
-#include "main.h"
-
 static const gchar FILMS_FILE[]   = "themes/films.txt";
 static const gchar OBJECTS_FILE[] = "themes/objects.txt";
 static const gchar PERSONS_FILE[] = "themes/persons.txt";
@@ -38,7 +36,7 @@ static const gint  MAX_RANDOM     = 41;
 
 gchar *gh_utils_get_system_file          (const gchar *filename);
 gchar *gh_utils_format_text_with_markup  (const gchar *text, int type);
-void   gh_utils_get_sentence             (Gamewidget *gamew);
 void   gh_utils_load_image               (const char *file_image, Gamewidget *gamew);
+void   gh_utils_import_languages         ();
 
 #endif /* GHANGTUX_UTILS_H__ */

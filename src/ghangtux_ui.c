@@ -37,32 +37,27 @@
 #include "ghangtux_ui.h"
 #include "ghangtux_management.h"
 #include "ghangtux_utils.h"
-#include "main.h"
+#include "ghangtux.h"
 
-
-/* ---- Methods ------ */
-static void ui_manager_init             (Gamewidget *gamew);
-static void keyboard_init               (Gamewidget *gamew);
-static void set_logo                    (Gamewidget *gamew);
-static void set_actions                 (Gamewidget *gamew);
-void        gh_ui_activate_radio_action (G_GNUC_UNUSED GtkRadioAction *raction,
-                                         GtkRadioAction *curr_raction,
-                                         gpointer data);
+/* ---- Private Methods ------ */
+static void  ui_manager_init (Gamewidget *gamew);
+static void  keyboard_init   (Gamewidget *gamew);
+static void  set_logo        (Gamewidget *gamew);
+static void  set_actions     (Gamewidget *gamew);
 
 /* G_GNUC_UNUSED: For desabling warnings when
  * a parameter in a function is not used. */
 
-/* ---- Actions ------ */
+/* ---- Action Callbacks ------ */
 static void new_action      (G_GNUC_UNUSED GtkAction *action, gpointer data);
 static void solve_action    (G_GNUC_UNUSED GtkAction *action, gpointer data);
 static void quit_action     (G_GNUC_UNUSED GtkAction *action, gpointer data);
 static void about_action    (G_GNUC_UNUSED GtkAction *action, gpointer data);
 
-
+/* --- Signal callbacks --- */
 /* G_MODULE_EXPORT: For windows applications to put the 
  * callbakcs in the symbol table. */
 
-/* --- Signal's callbacks --- */
 G_MODULE_EXPORT static void extern_key_release          (GtkWidget *window, GdkEventKey *event, 
                                                          gpointer data);
 G_MODULE_EXPORT static void format_sentence_with_letter (GHangtuxKeyboard *keyboard, 
@@ -244,7 +239,7 @@ ui_manager_init (Gamewidget *gamew)
    gtk_box_pack_start (GTK_BOX (gamew->vbox), gamew->menubar, FALSE, FALSE, 0);
    gtk_box_reorder_child (GTK_BOX (gamew->vbox), gamew->menubar, 0);
    
-   /*Load toolbar. */
+   /* Load toolbar. */
    gamew->toolbar = gtk_ui_manager_get_widget (gamew->ui_manager, TOOLBAR);
    gtk_toolbar_set_style (GTK_TOOLBAR (gamew->toolbar), GTK_TOOLBAR_ICONS);
    gtk_box_pack_start (GTK_BOX (gamew->vbox), gamew->toolbar, FALSE, FALSE, 0);
@@ -255,6 +250,7 @@ ui_manager_init (Gamewidget *gamew)
 static void
 keyboard_init (Gamewidget *gamew)
 {
+   /* New keyboard. */
    gamew->keyboard = gh_keyboard_new();
 
    /* Using game's keyboard */
@@ -273,24 +269,31 @@ keyboard_init (Gamewidget *gamew)
 static void
 set_actions (Gamewidget *gamew)
 {
+   /* New action group. */
    gamew->def_group = gtk_action_group_new (ACTION_GROUP);
+   
+   /* Make string translations possible. */
    gtk_action_group_set_translation_domain (gamew->def_group, GETTEXT_PACKAGE);
+
+   /* Add actions to action group. */
    gtk_action_group_add_actions (gamew->def_group, actions, NUM_ACTIONS, gamew);
    gtk_action_group_add_radio_actions (gamew->def_group, radio_actions, NUM_RACTIONS,
-                                       0, G_CALLBACK (gh_ui_activate_radio_action),  gamew);
+                                       0, G_CALLBACK (gh_ui_activate_radio_action), gamew);
 }
 
 /* Activates a radio action from the menu. */
 void
 gh_ui_activate_radio_action ( G_GNUC_UNUSED GtkRadioAction *raction,
-                        GtkRadioAction *curr_raction,
-                        gpointer data)
+                              GtkRadioAction *curr_raction,
+                              gpointer data)
 {
    Gamewidget *gamew = (Gamewidget *)data;
     
    /* Sets the current theme */
    gamew->theme_id = gtk_radio_action_get_current_value (curr_raction);
-   gh_utils_get_sentence (gamew);
+   
+   /* Start a new game with the selected theme. */
+   gh_management_new_game_start (gamew);
 }
 
 /* ---------  START: Action Callbacks  ---------*/
@@ -298,10 +301,10 @@ gh_ui_activate_radio_action ( G_GNUC_UNUSED GtkRadioAction *raction,
 /* Loads a new game for the same current theme. */
 static void 
 new_action (G_GNUC_UNUSED GtkAction *action,
-             gpointer data)
+            gpointer data)
 {
    Gamewidget *gamew = (Gamewidget *)data;
-   gh_utils_get_sentence (gamew);
+   gh_management_new_game_start (gamew);
 }
 
 /* Displays the solution for the current game. */
@@ -389,6 +392,7 @@ format_sentence_with_letter (G_GNUC_UNUSED  GHangtuxKeyboard *keyboard,
       g_strcanon ( gamew->display_sentence, gamew->valid_chars, '_');
       markup = gh_utils_format_text_with_markup (gamew->display_sentence, 0); 
       gtk_label_set_markup (GTK_LABEL (gamew->display_label), markup);
+      g_free (markup);
       
       /* Player wins. */
       if (g_strcmp0(gamew->sentence, gamew->display_sentence) == 0)
@@ -411,9 +415,7 @@ format_sentence_with_letter (G_GNUC_UNUSED  GHangtuxKeyboard *keyboard,
          gh_management_set_end_game(gamew,FALSE);
       }
    }
-   
    g_free (image);
-   g_free (markup);
 }
 
 /* Destroy main window. */
@@ -423,4 +425,5 @@ main_win_destroy (G_GNUC_UNUSED GtkObject *window,
 {
    gtk_main_quit();
 }
+
 /* -----------  END: Signal Callbacks ----------*/

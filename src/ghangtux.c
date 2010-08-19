@@ -1,6 +1,6 @@
 /*
  * ########################################################################
- * # File: GHangtux - main.h                                              #
+ * # File: GHangtux - ghangtux.c                                          #
  * #                                                                      #
  * # Author: Patricia Santana Cruz  <patriciasc@openismus.com>            #
  * #                                                                      #
@@ -25,44 +25,29 @@
  * ########################################################################
 */
 
-#ifndef MAIN_H__
-#define MAIN_H__
+#include "ghangtux_ui.h"
+#include "ghangtux_management.h"
+#include "ghangtux.h"
 
-#include <gtk/gtk.h>
-
-typedef struct _GameWidget Gamewidget;
-
-/* Game widgets. */
-struct _GameWidget
+int
+main (int argc,
+     char *argv[])
 {
-   GtkBuilder *builder;       /* Apps builder */
-   GtkUIManager *ui_manager;  /* UI Manager */
-   GtkWidget *window;         /* Toplevel window */
+   Gamewidget gamew = gh_management_gamew_init();
 
-   GtkWidget *vbox;           /* Vertical box */
-   GtkWidget *vbox2;          /* Vertical box 2 */
-   GtkWidget *menubar;        /* Menubar */
+   gtk_init (&argc, &argv);
+  
+   /* Internationalization i18n. */
+   gh_utils_import_languages ();
+ 
+   /* Set up the builder. */
+   gh_management_set_builder (&gamew);
+   
+   /* Set up application UI. */ 
+   gh_ui_init (&gamew);
+  
+   /* Prepare first game with FILM theme */
+   gh_management_game_init (&gamew);
 
-   GtkWidget *toolbar;        /* Toolbar */
-   GtkWidget *eventbox;       /* Eventbox */
-   gchar *sentence;           /* Games's sentence */
-
-   gchar *display_sentence;   /* Displayed sentence */
-   const gchar *valid_chars;  /* Player asserted characters */
-   GtkLabel *display_label;   /* Label for display_sentence */
-
-   GtkLabel *title_label;     /* Title label */
-   GtkImage *image;           /* Displayed image */
-   GtkActionGroup *def_group; /* Default action group */
-
-   gint n_img;                /* Current image number */
-   gboolean first_game;       /* Indicates if the current game is the first */
-   GtkWidget *keyboard;       /* Keyboard */
-
-   GtkWidget *statusbar;      /* Game status bar */
-   gint scontext;             /* Game status bar's context */
-   gint theme_id;             /* Current theme's identifier */
-   GdkPixbuf *logo;           /* Application's logo */
-};
-
-#endif /* MAIN_H__ */
+   return 0;
+} 

@@ -27,7 +27,7 @@
 #ifndef GHANGTUX_UI_H__
 #define GHANGTUX_UI_H__
 
-#include "main.h"
+#include "ghangtux.h"
 
 static const gchar GUI_FILE[]     = "ui/ghangtux.glade";
 static const gchar UI_FILE[]      = "ui/menu.ui";
@@ -39,8 +39,8 @@ static const gchar ACTION_GROUP[] = "MainActionGroup";
 /* G_GNUC_UNUSED: for desabling warnings when 
  * a parameter in a function is not used */
 
-void gh_ui_init(Gamewidget *gamew);
+void gh_ui_init                  (Gamewidget *gamew);
 void gh_ui_activate_radio_action (G_GNUC_UNUSED GtkRadioAction *raction,
-                             GtkRadioAction *curr_raction, gpointer data);
+                                  GtkRadioAction *curr_raction, gpointer data);
 
 #endif /* GHANGTUX_UI_H__ */

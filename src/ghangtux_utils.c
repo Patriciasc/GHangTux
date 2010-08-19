@@ -37,7 +37,7 @@
 #include "ghangtux_ui.h"
 #include "ghangtux_utils.h"
 #include "ghangtux_management.h"
-#include "main.h"
+#include "ghangtux.h"
 
 /* Gets player's system files. */
 gchar *
@@ -64,102 +64,10 @@ gh_utils_get_system_file (const gchar *filename)
    return pathname;
 }
 
-/* Selects a random sentence or word from the game files. */
-void
-gh_utils_get_sentence (Gamewidget *gamew)
-{
-   GFile *file = NULL;
-   GError *error = NULL;
-   GFileInputStream *fstream = NULL; 
-   GDataInputStream *stream = NULL;
-   static gchar *sys_file = NULL;
-   gchar *markup = NULL;
-   gsize length = 0;
-   gint random = 0;
-   
-   gh_keyboard_set_sensitive (GHANGTUX_KEYBOARD (gamew->keyboard), TRUE);
-   gh_utils_load_image(sys_file = gh_utils_get_system_file (TUX_IMG_0), gamew);
-   g_free (sys_file);   
-   gamew->n_img = 1;
-
-   /* Status bar context. */
-   gamew->scontext = gtk_statusbar_get_context_id (
-                    GTK_STATUSBAR (gamew->statusbar),"Statusbar");
-
-   /* Select the file. */
-   switch (gamew->theme_id)
-   {
-      case 0:
-         markup = gh_utils_format_text_with_markup (_("Guess the FILM by typing letters"), 1); 
-         file = g_file_new_for_path (sys_file = gh_utils_get_system_file(FILMS_FILE));
-         gtk_statusbar_push (GTK_STATUSBAR (gamew->statusbar), GPOINTER_TO_INT (gamew), _("Playing theme: Films"));
-         break;
-
-      case 1:
-         markup = gh_utils_format_text_with_markup (_("Guess the OBJECT by typing letters"), 1); 
-         file = g_file_new_for_path (sys_file = gh_utils_get_system_file (OBJECTS_FILE));
-         gtk_statusbar_push (GTK_STATUSBAR (gamew->statusbar), GPOINTER_TO_INT (gamew), _("Playing theme: Objects"));
-         break;
-
-      case 2:
-         markup = gh_utils_format_text_with_markup (_("Guess the PERSON by typing letters"), 1); 
-         file = g_file_new_for_path (sys_file = gh_utils_get_system_file(PERSONS_FILE));
-         gtk_statusbar_push (GTK_STATUSBAR (gamew->statusbar), GPOINTER_TO_INT (gamew), _("Playing theme: Persons"));
-         break;
-
-      default:
-         g_critical ("Creating GFIle failed\n");
-   }
-  
-   /* Sets label with markup. */ 
-   gtk_label_set_markup (GTK_LABEL (gamew->title_label), markup);
-
-   if (!(fstream = g_file_read (file, NULL, &error)))
-   {
-      g_critical ("Creating file stream error: %s", error->message);
-      g_error_free (error);
-   }
-   
-   g_free (markup);
-
-   stream = g_data_input_stream_new (G_INPUT_STREAM(fstream));
-
-   /* Select a random sentence from the file. */
-   random = g_random_int_range (MIN_RANDOM, MAX_RANDOM);
-   
-   while (((gamew->sentence = g_data_input_stream_read_line (stream, &length, NULL, 
-            &error)) != NULL) && (random != 0))
-   {
-      if (error)
-      {
-         g_critical ("Reading file error: %s\n", error->message);
-         g_error_free (error);
-      }
-      else
-      {
-         random--;
-         g_free (gamew->sentence);
-      }
-   }
-   
-   /* Format the sentence for displaying the first time. */
-   g_free (gamew->display_sentence);
-   gamew->display_sentence = g_strdup (gamew->sentence);
-   gamew->valid_chars = " ";
-   g_strcanon ( gamew->display_sentence, gamew->valid_chars, '_');
-   markup = gh_utils_format_text_with_markup (gamew->display_sentence, 0); 
-   gtk_label_set_markup (GTK_LABEL (gamew->display_label), markup);
-   
-   g_object_unref (file);
-   g_object_unref (stream);
-   g_object_unref (fstream);
-   g_free (sys_file);
-   g_free (markup);
-}
-
 /* Formats the text with a markup before displaying it. */ 
 gchar *
-gh_utils_format_text_with_markup (const gchar *text, int type)
+gh_utils_format_text_with_markup (const gchar *text,
+                                  int type)
 {
    gchar *markup = NULL;
 
@@ -180,7 +88,8 @@ gh_utils_format_text_with_markup (const gchar *text, int type)
 
 /* Loads an image for the GtkImage central area. */
 void
-gh_utils_load_image (const char *file_image, Gamewidget *gamew)
+gh_utils_load_image (const char *file_image,
+                     Gamewidget *gamew)
 {
    GdkPixbuf *tux_image = NULL;
    GError *error = NULL;
@@ -203,4 +112,13 @@ gh_utils_load_image (const char *file_image, Gamewidget *gamew)
    
    gtk_image_set_from_pixbuf (gamew->image, tux_image); 
    g_object_unref (G_OBJECT (tux_image));
+}
+
+/* Import languages for the application. */
+void
+gh_utils_import_languages ()
+{
+   bindtextdomain(GETTEXT_PACKAGE, PROGRAMNAME_LOCALEDIR);
+   bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
+   textdomain(GETTEXT_PACKAGE);
 }

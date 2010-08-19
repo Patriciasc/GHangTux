@@ -1,6 +1,6 @@
 /*
  * ########################################################################
- * # File: GHangtux - main.c                                              #
+ * # File: GHangtux - ghangtux.h                                          #
  * #                                                                      #
  * # Author: Patricia Santana Cruz  <patriciasc@openismus.com>            #
  * #                                                                      #
@@ -25,29 +25,43 @@
  * ########################################################################
 */
 
-#include "ghangtux_ui.h"
-#include "ghangtux_management.h"
-#include "main.h"
+#ifndef MAIN_H__
+#define MAIN_H__
 
-int
-main (int argc,
-     char *argv[])
+#include <gtk/gtk.h>
+
+typedef struct _GameWidget Gamewidget;
+
+/* Game widgets and control elements. */
+struct _GameWidget
 {
-   Gamewidget gamew = gh_management_gamew_init();
+   GtkBuilder *builder;       /* Apps builder */
+   GtkUIManager *ui_manager;  /* UI Manager */
+   GtkWidget *window;         /* Toplevel window */
 
-   gtk_init (&argc, &argv);
-  
-   /* Internationalization i18n. */
-   gh_management_import_languages ();
- 
-   /* Set up the builder. */
-   gh_management_set_builder (&gamew);
-   
-   /* Set up application UI. */ 
-   gh_ui_init (&gamew);
-  
-   /* Prepare first game with FILM theme */
-   gh_management_game_init (&gamew);
+   GtkWidget *vbox;           /* Vertical box */
+   GtkWidget *vbox2;          /* Vertical box 2 */
+   GtkWidget *menubar;        /* Menubar */
 
-   return 0;
-} 
+   GtkWidget *toolbar;        /* Toolbar */
+   GtkWidget *eventbox;       /* Eventbox */
+   gchar *sentence;           /* Games's sentence */
+
+   gchar *display_sentence;   /* Displayed sentence */
+   const gchar *valid_chars;  /* Player asserted characters */
+   GtkLabel *display_label;   /* Label for display_sentence */
+
+   GtkLabel *title_label;     /* Title label */
+   GtkImage *image;           /* Displayed image */
+   GtkActionGroup *def_group; /* Default action group */
+
+   gint n_img;                /* Current image number */
+   GtkWidget *keyboard;       /* Keyboard */
+   GtkWidget *statusbar;      /* Game status bar */
+
+   gint scontext;             /* Game status bar's context */
+   gint theme_id;             /* Current theme's identifier */
+   GdkPixbuf *logo;           /* Application's logo */
+};
+
+#endif /* MAIN_H__ */

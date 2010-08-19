@@ -37,8 +37,8 @@ ghangtux_LDADD = $(DEP_LIBS)
 SUBDIRS = po
 
 bin_PROGRAMS = ghangtux
-ghangtux_SOURCES = src/main.h \
-						 src/main.c \
+ghangtux_SOURCES = src/ghangtux.h \
+						 src/ghangtux.c \
                    src/ghangtux_keyboard.h \
                    src/ghangtux_keyboard.c \
                    src/ghangtux_management.h \

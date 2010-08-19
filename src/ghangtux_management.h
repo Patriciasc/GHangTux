@@ -37,13 +37,12 @@ static const gchar VBOX2[]          = "vbox2";
 static const gchar IMAGE[]          = "hangtux_area";
 static const gchar STATUSBAR[]      = "statusbar";
 static const gchar EVENTBOX[]       = "eventbox";
+static const gint NUM_IMAGES        = 7;
 
-static const gint NUM_IMAGES = 7;
-
-void       gh_management_set_end_game              (gpointer data, int winner);
-void       gh_management_game_init                 (Gamewidget *gamew);
-void       gh_management_set_builder               (Gamewidget *gamew);
-Gamewidget gh_management_gamew_init                ();
-void       gh_management_import_languages          ();
+void        gh_management_game_init       (Gamewidget *gamew);
+Gamewidget  gh_management_gamew_init      ();
+void        gh_management_set_end_game    (gpointer data, int winner);
+void        gh_management_set_builder     (Gamewidget *gamew);
+void        gh_management_new_game_start  (Gamewidget *gamew);
 
 #endif /* GHANGTUX_MANAGEMENT_H__ */
