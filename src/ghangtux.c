@@ -27,6 +27,7 @@
 
 #include "ghangtux_ui.h"
 #include "ghangtux_management.h"
+#include "ghangtux_utils.h"
 #include "ghangtux.h"
 
 int
