@@ -1,3 +1,5 @@
-src/main.c
-ghangtux.desktop.in
+src/ghangtux.c
+src/ghangtux_management.c
+src/ghangtux_ui.c
 data/ui/ghangtux.glade
+ghangtux.desktop.in
