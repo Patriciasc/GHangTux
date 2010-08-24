@@ -6,7 +6,7 @@
  * #                                                                      #
  * # Copyright (C) 2010 Openismus GmbH                                    #
  * #                                                                      #
- * # Version: 1.1                                                         #  
+ * # Version: 1.1                                                         #
  * #                                                                      #
  * # Description: A variation of the Hangman game.                        #
  * #                                                                      #
@@ -23,7 +23,7 @@
  * # You should have received a copy of the GNU General Public License    #
  * # along with GHangtux. If not, see <http://www.gnu.org/licenses/>.     #
  * ########################################################################
-*/
+ */
 
 #ifndef GHANGTUX_KEYBOARD_H__
 #define GHANGTUX_KEYBOARD_H__
@@ -47,16 +47,16 @@ typedef struct _GHangtuxKeyboardPrivate GHangtuxKeyboardPrivate;
 
 struct _GHangtuxKeyboard
 {
-   GtkTable parent_instance;
-   /* private */
-   GHangtuxKeyboardPrivate *priv;
+    GtkTable parent_instance;
+    /* private */
+    GHangtuxKeyboardPrivate *priv;
 };
 
 struct _GHangtuxKeyboardClass
 {
-   GtkTableClass parent_class;
+    GtkTableClass parent_class;
 
-   void (* key_clicked) (GHangtuxKeyboard *keyboard, const gchar key_name);
+    void (* key_clicked) (GHangtuxKeyboard *keyboard, const gchar key_name);
 };
 
 /* Method definitions for the user. */

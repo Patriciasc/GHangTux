@@ -27,3 +27,9 @@ po/POTFILES
 po/es.gmo
 po/stamp-it
 po/ghangtux.pot
+docs/gtk-doc.make
+.libs/
+libghangtux.la
+libtool
+libtoolsrc/*.lo
+src/*.lo

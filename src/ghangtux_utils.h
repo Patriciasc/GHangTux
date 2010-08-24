@@ -6,7 +6,7 @@
  * #                                                                      #
  * # Copyright (C) 2010 Openismus GmbH                                    #
  * #                                                                      #
- * # Version: 1.1                                                         #  
+ * # Version: 1.1                                                         #
  * #                                                                      #
  * # Description: A variation of the Hangman game.                        #
  * #                                                                      #
@@ -23,7 +23,7 @@
  * # You should have received a copy of the GNU General Public License    #
  * # along with GHangtux. If not, see <http://www.gnu.org/licenses/>.     #
  * ########################################################################
-*/
+ */
 
 #ifndef GHANGTUX_UTILS_H__
 #define GHANGTUX_UTILS_H__

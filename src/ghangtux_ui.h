@@ -6,7 +6,7 @@
  * #                                                                      #
  * # Copyright (C) 2010 Openismus GmbH                                    #
  * #                                                                      #
- * # Version: 1.1                                                         #  
+ * # Version: 1.1                                                         #
  * #                                                                      #
  * # Description: A variation of the Hangman game.                        #
  * #                                                                      #
@@ -23,7 +23,7 @@
  * # You should have received a copy of the GNU General Public License    #
  * # along with GHangtux. If not, see <http://www.gnu.org/licenses/>.     #
  * ########################################################################
-*/
+ */
 #ifndef GHANGTUX_UI_H__
 #define GHANGTUX_UI_H__
 
@@ -37,9 +37,9 @@ static const gchar LOGO[]         = "icons/hicolor/200x200/apps/ghangtux.png";
 static const gchar ACTION_GROUP[] = "MainActionGroup";
 
 typedef enum {
-  GAME_WON, /* Player won the game. */
-  GAME_LOST, /* Player lost the game. */
-  GAME_SOLUTION /* Player asked to see the solution of the game. */
+    GAME_WON, /* Player won the game. */
+    GAME_LOST, /* Player lost the game. */
+    GAME_SOLUTION /* Player asked to see the solution of the game. */
 } GameEndCondition;
 
 /* G_GNUC_UNUSED: for desabling warnings when 

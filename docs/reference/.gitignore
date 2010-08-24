@@ -1,0 +1,6 @@
+html/*
+xml/*
+*.in
+ghangtux-1.1*
+*.stamp
+Makefile

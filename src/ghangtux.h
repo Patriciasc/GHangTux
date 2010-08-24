@@ -6,7 +6,7 @@
  * #                                                                      #
  * # Copyright (C) 2010 Openismus GmbH                                    #
  * #                                                                      #
- * # Version: 1.1                                                         #  
+ * # Version: 1.1                                                         #
  * #                                                                      #
  * # Description: A variation of the Hangman game.                        #
  * #                                                                      #
@@ -23,7 +23,7 @@
  * # You should have received a copy of the GNU General Public License    #
  * # along with GHangtux. If not, see <http://www.gnu.org/licenses/>.     #
  * ########################################################################
-*/
+ */
 
 #ifndef MAIN_H__
 #define MAIN_H__
@@ -35,33 +35,33 @@ typedef struct _GameWidget Gamewidget;
 /* Game widgets and control elements. */
 struct _GameWidget
 {
-   GtkBuilder *builder;       /* Apps builder */
-   GtkUIManager *ui_manager;  /* UI Manager */
-   GtkWidget *window;         /* Toplevel window */
+    GtkBuilder *builder;       /* Apps builder */
+    GtkUIManager *ui_manager;  /* UI Manager */
+    GtkWidget *window;         /* Toplevel window */
 
-   GtkWidget *vbox;           /* Vertical box */
-   GtkWidget *vbox2;          /* Vertical box 2 */
-   GtkWidget *menubar;        /* Menubar */
+    GtkWidget *vbox;           /* Vertical box */
+    GtkWidget *vbox2;          /* Vertical box 2 */
+    GtkWidget *menubar;        /* Menubar */
 
-   GtkWidget *toolbar;        /* Toolbar */
-   GtkWidget *eventbox;       /* Eventbox */
-   gchar *sentence;           /* Games's sentence */
+    GtkWidget *toolbar;        /* Toolbar */
+    GtkWidget *eventbox;       /* Eventbox */
+    gchar *sentence;           /* Games's sentence */
 
-   gchar *display_sentence;   /* Displayed sentence */
-   const gchar *valid_chars;  /* Player asserted characters */
-   GtkLabel *display_label;   /* Label for display_sentence */
+    gchar *display_sentence;   /* Displayed sentence */
+    const gchar *valid_chars;  /* Player asserted characters */
+    GtkLabel *display_label;   /* Label for display_sentence */
 
-   GtkLabel *title_label;     /* Title label */
-   GtkImage *image;           /* Displayed image */
-   GtkActionGroup *def_group; /* Default action group */
+    GtkLabel *title_label;     /* Title label */
+    GtkImage *image;           /* Displayed image */
+    GtkActionGroup *def_group; /* Default action group */
 
-   gint n_img;                /* Current image number */
-   GtkWidget *keyboard;       /* Keyboard */
-   GtkWidget *statusbar;      /* Game status bar */
+    gint n_img;                /* Current image number */
+    GtkWidget *keyboard;       /* Keyboard */
+    GtkWidget *statusbar;      /* Game status bar */
 
-   gint scontext;             /* Game status bar's context */
-   gint theme_id;             /* Current theme's identifier */
-   GdkPixbuf *logo;           /* Application's logo */
+    gint scontext;             /* Game status bar's context */
+    gint theme_id;             /* Current theme's identifier */
+    GdkPixbuf *logo;           /* Application's logo */
 };
 
 #endif /* MAIN_H__ */
